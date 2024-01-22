@@ -24,7 +24,7 @@
   function handleHowdyClick() {
     vscode.postMessage({
       command: "hello",
-      text: "Coco is good! 🥥",
+      text: "Coconutty! 🥥",
     });
   }
 </script>
