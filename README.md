@@ -1,8 +1,6 @@
-# Hello World (Svelte)
+# Coco 🥥
 
-This is an implementation of the default [Hello World](https://github.com/microsoft/vscode-webview-ui-toolkit-samples/tree/main/default/hello-world) sample extension that demonstrates how to set up and use a [Svelte](https://svelte.dev/) + [Webview UI Toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit) webview extension.
-
-![A screenshot of the sample extension.](./assets/hello-world.png)
+Coco is a new way to edit and interact with your code.
 
 ## Documentation
 
@@ -12,23 +10,14 @@ For a deeper dive into how this sample works, read the guides below.
 - [Extension commands](./docs/extension-commands.md)
 - [Extension development cycle](./docs/extension-development-cycle.md)
 
-## Run The Sample
+## Run The Extension
 
 ```bash
-# Copy sample extension locally
-npx degit microsoft/vscode-webview-ui-toolkit-samples/frameworks/hello-world-svelte hello-world
-
-# Navigate into sample directory
-cd hello-world
-
 # Install dependencies for both the extension and webview UI source code
 npm run install:all
 
 # Build webview UI source code
 npm run build:webview
-
-# Open sample in VS Code
-code .
 ```
 
 Once the sample is open inside VS Code you can run the extension by doing the following:
