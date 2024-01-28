@@ -6,10 +6,9 @@
     import { python } from "@codemirror/lang-python"
     type $$Props = NodeProps;
   
-    export let data: $$Props['data'];
     export let isConnectable: $$Props['isConnectable'];
   
-    const { color } = data;
+   
 
     const toggleShow = (): void => {
         show = !show;
