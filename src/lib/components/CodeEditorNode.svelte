@@ -3,6 +3,7 @@
   import CodeMirror from "svelte-codemirror-editor";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
+
   type $$Props = NodeProps;
 
   export let isConnectable: $$Props["isConnectable"];
@@ -23,25 +24,26 @@
     console.log("delete");
   };
 
-  let cellName = "New Cell";
+  let cellName = "";
   let show = true;
-  let value = "import pandas as pd\nimport numpy as np\n\nprint('Hello World')";
+  let value = "print('Hello Coco! 🥥')";
 </script>
 
 <Handle type="target" position={Position.Left} style="" {isConnectable} />
 <div class="editor-wrapper">
   <div class="header">
-    {#if show}
-      <button class="icon-wrapper" on:click={toggleShow}>
-        <Icon name="chevron-down" />
-      </button>
-    {:else}
-      <button class="icon-wrapper" on:click={toggleShow}>
-        <Icon name="chevron-right" />
-      </button>
-    {/if}
-
-    <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
+    <span class="cell-core">
+      {#if show}
+        <button class="icon-wrapper" on:click={toggleShow}>
+          <Icon name="chevron-down" />
+        </button>
+      {:else}
+        <button class="icon-wrapper" on:click={toggleShow}>
+          <Icon name="chevron-right" />
+        </button>
+      {/if}
+      <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
+    </span>
 
     {#if show}
       <span class="buttons">
@@ -91,15 +93,20 @@
     background-color: #2d2d2d;
   }
 
+  .cell-core {
+    display: flex;
+  }
+
   .cell-name {
     background-color: transparent;
     border: none;
     border-radius: 0.4rem;
     outline: none;
-    color: white;
+    color: rgb(164, 156, 144);
+    font-family: monospace;
     font-size: 1.2rem;
-    font-weight: 600;
-    margin-left: 1rem;
+    font-weight: 500;
+    margin-right: 1.5rem;
     padding: 0.4rem;
   }
 
