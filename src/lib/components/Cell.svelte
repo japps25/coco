@@ -8,24 +8,52 @@
   let cellName = "New Cell";
   let show = true;
   let value = "";
+
+  const toggleShow = (): void => {
+    show = !show;
+  };
+
+  const handleRun = (): void => {
+    console.log("run");
+  };
+
+  const handleClear = (): void => {
+    console.log("clear");
+  };
+
+  const handleDelete = (): void => {
+    console.log("delete");
+  };
 </script>
 
-<Node position={{ x: 1090, y: 150 }}>
+<Node position={{ x: 1090, y: 20 }}>
   <div class="editor-wrapper">
     <div class="header">
       {#if show}
-        <Icon name="chevron-down" on:click={() => (show = false)} />
+        <button class="icon-wrapper" on:click={toggleShow}>
+          <Icon name="chevron-down" />
+        </button>
       {:else}
-        <Icon name="chevron-right" on:click={() => (show = true)} />
+        <button class="icon-wrapper" on:click={toggleShow}>
+          <Icon name="chevron-right" />
+        </button>
       {/if}
 
       <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
 
-      <span class="buttons">
-        <Icon name="gear" />
-        <Icon name="broom" on:click={() => (value = "")} />
-        <Icon name="trash" />
-      </span>
+      {#if show}
+        <span class="buttons">
+          <button class="icon-wrapper" on:click={handleRun}>
+            <Icon name="gear" />
+          </button>
+          <button class="icon-wrapper" on:click={handleClear}>
+            <Icon name="broom" />
+          </button>
+          <button class="icon-wrapper" on:click={handleDelete}>
+            <Icon name="trash" />
+          </button>
+        </span>
+      {/if}
     </div>
 
     {#if show}
@@ -35,9 +63,9 @@
           lang={python()}
           styles={{
             "&": {
-              width: "500px",
+              width: "100%",
               maxWidth: "100%",
-              height: "50rem",
+              height: "100%",
             },
           }}
         />
@@ -50,10 +78,8 @@
   .editor-wrapper {
     display: flex;
     flex-direction: column;
-    /* width: 500px;
-    height: 50rem; */
     background-color: #1e1e1e;
-    border-radius: 8px;
+    border-radius: 0.4rem;
     overflow: hidden;
   }
 
@@ -68,16 +94,31 @@
   .cell-name {
     background-color: transparent;
     border: none;
+    border-radius: 0.4rem;
     outline: none;
     color: white;
     font-size: 1.2rem;
     font-weight: 600;
     margin-left: 1rem;
+    padding: 0.4rem;
+  }
+
+  .cell-name:hover {
+    cursor: pointer;
+    background-color: #3d3d3d;
   }
 
   .buttons {
     display: flex;
     align-items: center;
     margin-left: auto;
+  }
+
+  .icon-wrapper {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 0rem;
+    margin: 0rem;
   }
 </style>

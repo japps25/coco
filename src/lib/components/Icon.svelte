@@ -52,11 +52,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 0.4rem;
     background-color: #2d2d2d;
     color: white;
+    padding: 0.4rem;
     margin-right: 0.5rem;
   }
 

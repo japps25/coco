@@ -1,12 +1,12 @@
-<script>
-  import { Svelvet, ThemeToggle } from "svelvet";
+<script lang="ts">
+  import { Svelvet, Node, ThemeToggle } from "svelvet";
   import Cell from "./lib/components/Cell.svelte";
 </script>
 
 <body>
   <Svelvet fitView controls minimap>
-    <Cell />
     <ThemeToggle main="dark" alt="light" slot="toggle" />
+    <Cell />
   </Svelvet>
 </body>
 
