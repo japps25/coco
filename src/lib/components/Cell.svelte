@@ -1,13 +1,14 @@
 <script lang="ts">
   import { Node } from "svelvet";
   import Icon from "./Icon.svelte";
+  import { trapFocus } from "./actions";
 
   import CodeMirror from "svelte-codemirror-editor";
   import { python } from "@codemirror/lang-python";
 
   let cellName = "New Cell";
   let show = true;
-  let value = "";
+  let value = "import pandas as pd\nimport numpy as np\n\nprint('Hello World')";
 
   const toggleShow = (): void => {
     show = !show;
@@ -18,7 +19,7 @@
   };
 
   const handleClear = (): void => {
-    console.log("clear");
+    value = "";
   };
 
   const handleDelete = (): void => {
@@ -57,7 +58,7 @@
     </div>
 
     {#if show}
-      <div class="editor">
+      <div class="editor" use:trapFocus>
         <CodeMirror
           bind:value
           lang={python()}
