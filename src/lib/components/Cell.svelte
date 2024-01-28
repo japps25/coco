@@ -1,36 +1,48 @@
 <script lang="ts">
   import { Node } from "svelvet";
+  import Icon from "./Icon.svelte";
 
   import CodeMirror from "svelte-codemirror-editor";
   import { python } from "@codemirror/lang-python";
 
   let cellName = "New Cell";
+  let show = true;
   let value = "";
 </script>
 
 <Node position={{ x: 1090, y: 150 }}>
   <div class="editor-wrapper">
     <div class="header">
-      <icon name="hide-show" size="1.5rem" />
+      {#if show}
+        <Icon name="chevron-down" on:click={() => (show = false)} />
+      {:else}
+        <Icon name="chevron-right" on:click={() => (show = true)} />
+      {/if}
+
       <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
 
       <span class="buttons">
-        <button class="button">Run</button>
-        <button class="button">Clear</button>
-        <button class="button">Delete</button>
+        <Icon name="gear" />
+        <Icon name="broom" on:click={() => (value = "")} />
+        <Icon name="trash" />
       </span>
     </div>
-    <CodeMirror
-      bind:value
-      lang={python()}
-      styles={{
-        "&": {
-          width: "500px",
-          maxWidth: "100%",
-          height: "50rem",
-        },
-      }}
-    />
+
+    {#if show}
+      <div class="editor">
+        <CodeMirror
+          bind:value
+          lang={python()}
+          styles={{
+            "&": {
+              width: "500px",
+              maxWidth: "100%",
+              height: "50rem",
+            },
+          }}
+        />
+      </div>
+    {/if}
   </div>
 </Node>
 
@@ -38,8 +50,8 @@
   .editor-wrapper {
     display: flex;
     flex-direction: column;
-    width: 500px;
-    height: 50rem;
+    /* width: 500px;
+    height: 50rem; */
     background-color: #1e1e1e;
     border-radius: 8px;
     overflow: hidden;
@@ -61,5 +73,11 @@
     font-size: 1.2rem;
     font-weight: 600;
     margin-left: 1rem;
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
   }
 </style>
