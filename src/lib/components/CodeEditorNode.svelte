@@ -80,12 +80,51 @@
   
  
   <style>
-    :global(.svelte-flow__node-selectorNode) {
-      font-size: 12px;
-      background: #eee;
-      border: 1px solid #555;
-      border-radius: 5px;
-      text-align: center;
-    }
+    .editor-wrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: #1e1e1e;
+    border-radius: 0.4rem;
+    overflow: hidden;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #3d3d3d;
+  }
+
+  .cell-name {
+    background-color: transparent;
+    border: none;
+    border-radius: 0.4rem;
+    outline: none;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    padding: 0.4rem;
+  }
+
+  .cell-name:hover {
+    cursor: pointer;
+    background-color: #3d3d3d;
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .icon-wrapper {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 0rem;
+    margin: 0rem;
+  }
   </style>
   
