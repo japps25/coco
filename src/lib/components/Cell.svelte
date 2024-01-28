@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {  Anchor, Node } from "svelvet";
+  import { Anchor, Node } from "svelvet";
   import Icon from "./Icon.svelte";
   import { trapFocus } from "./actions";
 
@@ -28,7 +28,6 @@
 </script>
 
 <Node position={{ x: 1090, y: 20 }}>
-
   <div class="editor-wrapper">
     <div class="header">
       {#if show}
@@ -74,7 +73,6 @@
       </div>
     {/if}
   </div>
-  
 </Node>
 
 <style>

@@ -1,34 +1,19 @@
 <script lang="ts">
-  import { writable } from 'svelte/store';
-  import dagre from '@dagrejs/dagre';
-  import {
-    SvelteFlow,
-    ConnectionLineType,
-    Panel,
-    Background,
-    Controls,
-    MiniMap,
-    Position,
-    type Node,
-    type Edge
-  } from '@xyflow/svelte';
+  import { writable } from "svelte/store";
+  import dagre from "@dagrejs/dagre";
+  import { SvelteFlow, Panel, Background, Controls, MiniMap, Position, type Node, type Edge } from "@xyflow/svelte";
 
-  import CodeEditorNode from './lib/components/CodeEditorNode.svelte';
-  import DragHandleNode from './lib/components/DragHandleNode.svelte';
+  import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
 
+  import "@xyflow/svelte/dist/style.css";
 
-  import '@xyflow/svelte/dist/style.css';
+  import { initialNodes, initialEdges } from "./nodes-and-edges";
 
-  import { initialNodes, initialEdges } from './nodes-and-edges';
-  
   const nodeTypes = {
     selectorNode: CodeEditorNode,
-    dragHandleNode: DragHandleNode
   };
 
-  const bgColor = writable('#1A192B');
-
-  
+  const bgColor = writable("#1A192B");
 
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -36,9 +21,8 @@
   const nodeWidth = 172;
   const nodeHeight = 36;
 
-
-  function getLayoutedElements(nodes: Node[], edges: Edge[], direction = 'TB') {
-    const isHorizontal = direction === 'LR';
+  function getLayoutedElements(nodes: Node[], edges: Edge[], direction = "TB") {
+    const isHorizontal = direction === "LR";
     dagreGraph.setGraph({ rankdir: direction });
 
     nodes.forEach((node) => {
@@ -60,17 +44,14 @@
       // so it matches the React Flow node anchor point (top left).
       node.position = {
         x: nodeWithPosition.x - nodeWidth / 2,
-        y: nodeWithPosition.y - nodeHeight / 2
+        y: nodeWithPosition.y - nodeHeight / 2,
       };
     });
 
     return { nodes, edges };
   }
-  
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-    initialNodes,
-    initialEdges
-  );
+
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
   const nodes = writable<Node[]>(layoutedNodes);
   const edges = writable<Edge[]>(layoutedEdges);
@@ -85,17 +66,14 @@
   }
 </script>
 
-
-
 <div style="height:100vh;">
   <SvelteFlow {nodes} {edges} {nodeTypes} style="background: {$bgColor}" fitView>
-
     <Panel position="top-right">
-    <button on:click={() => onLayout('TB')}>vertical layout</button>
-    <button on:click={() => onLayout('LR')}>horizontal layout</button>
+      <button on:click={() => onLayout("TB")}>vertical layout</button>
+      <button on:click={() => onLayout("LR")}>horizontal layout</button>
     </Panel>
-  <Background />
-  <Controls />
-  <MiniMap />
-</SvelteFlow>
+    <Background />
+    <Controls />
+    <MiniMap />
+  </SvelteFlow>
 </div>

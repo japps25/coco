@@ -1,86 +1,83 @@
 <script lang="ts">
-    import { Handle, Position, type NodeProps } from '@xyflow/svelte';
-    import CodeMirror from "svelte-codemirror-editor";
-    import Icon from "./Icon.svelte";
-    import { trapFocus } from "./actions";
-    import { python } from "@codemirror/lang-python"
-    type $$Props = NodeProps;
-  
-    export let isConnectable: $$Props['isConnectable'];
-  
+  import { Handle, Position, type NodeProps } from "@xyflow/svelte";
+  import CodeMirror from "svelte-codemirror-editor";
+  import Icon from "./Icon.svelte";
+  import { trapFocus } from "./actions";
+  import { python } from "@codemirror/lang-python";
+  type $$Props = NodeProps;
 
-    const toggleShow = (): void => {
-        show = !show;
-    };
+  export let isConnectable: $$Props["isConnectable"];
 
-    const handleRun = (): void => {
-        console.log("run");
-    };
+  const toggleShow = (): void => {
+    show = !show;
+  };
 
-    const handleClear = (): void => {
-        value = "";
-    };
+  const handleRun = (): void => {
+    console.log("run");
+  };
 
-    const handleDelete = (): void => {
-        console.log("delete");
-    };
+  const handleClear = (): void => {
+    value = "";
+  };
 
+  const handleDelete = (): void => {
+    console.log("delete");
+  };
 
-    let cellName = "New Cell";
-    let show = true;
-    let value = "import pandas as pd\nimport numpy as np\n\nprint('Hello World')";
-  </script>
-  
-  <Handle type="target" position={Position.Left} style="background: #555;" {isConnectable} />
-  <div class="editor-wrapper">
-    <div class="header">
-      {#if show}
-        <button class="icon-wrapper" on:click={toggleShow}>
-          <Icon name="chevron-down" />
-        </button>
-      {:else}
-        <button class="icon-wrapper" on:click={toggleShow}>
-          <Icon name="chevron-right" />
-        </button>
-      {/if}
+  let cellName = "New Cell";
+  let show = true;
+  let value = "import pandas as pd\nimport numpy as np\n\nprint('Hello World')";
+</script>
 
-      <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
+<Handle type="target" position={Position.Left} style="background: #555;" {isConnectable} />
+<div class="editor-wrapper">
+  <div class="header">
+    {#if show}
+      <button class="icon-wrapper" on:click={toggleShow}>
+        <Icon name="chevron-down" />
+      </button>
+    {:else}
+      <button class="icon-wrapper" on:click={toggleShow}>
+        <Icon name="chevron-right" />
+      </button>
+    {/if}
 
-      {#if show}
-        <span class="buttons">
-          <button class="icon-wrapper" on:click={handleRun}>
-            <Icon name="play" />
-          </button>
-          <button class="icon-wrapper" on:click={handleClear}>
-            <Icon name="broom" />
-          </button>
-          <button class="icon-wrapper" on:click={handleDelete}>
-            <Icon name="trash" />
-          </button>
-        </span>
-      {/if}
-    </div>
+    <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
 
     {#if show}
-      <div class="editor" use:trapFocus>
-        <CodeMirror
-          bind:value
-          lang={python()}
-          styles={{
-            "&": {
-              width: "100%",
-              maxWidth: "100%",
-              height: "100%",
-            },
-          }}
-        />
-      </div>
+      <span class="buttons">
+        <button class="icon-wrapper" on:click={handleRun}>
+          <Icon name="play" />
+        </button>
+        <button class="icon-wrapper" on:click={handleClear}>
+          <Icon name="broom" />
+        </button>
+        <button class="icon-wrapper" on:click={handleDelete}>
+          <Icon name="trash" />
+        </button>
+      </span>
     {/if}
   </div>
-  
- 
-  <style>
-    .editor-wrapper {
+
+  {#if show}
+    <div class="editor" use:trapFocus>
+      <CodeMirror
+        bind:value
+        lang={python()}
+        styles={{
+          "&": {
+            width: "100%",
+            maxWidth: "100%",
+            height: "100%",
+          },
+        }}
+      />
+    </div>
+  {/if}
+</div>
+
+<style>
+  .editor-wrapper {
     display: flex;
     flex-direction: column;
     background-color: #1e1e1e;
@@ -126,5 +123,4 @@
     padding: 0rem;
     margin: 0rem;
   }
-  </style>
-  
+</style>
