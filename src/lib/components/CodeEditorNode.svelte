@@ -49,7 +49,7 @@
       {#if show}
         <span class="buttons">
           <button class="icon-wrapper" on:click={handleRun}>
-            <Icon name="gear" />
+            <Icon name="play" />
           </button>
           <button class="icon-wrapper" on:click={handleClear}>
             <Icon name="broom" />
