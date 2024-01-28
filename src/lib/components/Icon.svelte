@@ -1,5 +1,4 @@
 <script lang="ts">
-  export let className = "";
   export let name = "";
 </script>
 
@@ -68,93 +67,8 @@
     margin-right: 0.5rem;
   }
 
-  .icon svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .icon[disabled] {
-    opacity: 0.5;
-  }
-
-  .icon[disabled] svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
   .icon:hover {
     cursor: pointer;
     background-color: #3d3d3d;
-  }
-
-  .icon:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
-  }
-
-  .icon[disabled]:hover {
-    cursor: not-allowed;
-  }
-
-  .icon[disabled]:hover svg {
-    fill: white;
   }
 </style>
