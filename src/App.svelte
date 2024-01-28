@@ -136,19 +136,16 @@
   }
 </script>
 
+
+
 <div style="height:100vh;">
-  <SvelteFlow 
-    {nodes} 
-    {edges} 
-    {nodeTypes} 
-    fitView
-    connectionLineType={ConnectionLineType.SmoothStep}
-    defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
-    >
+  <SvelteFlow {nodes} {edges} {nodeTypes} style="background: {$bgColor}" fitView>
     <Panel position="top-right">
     <button on:click={() => onLayout('TB')}>vertical layout</button>
     <button on:click={() => onLayout('LR')}>horizontal layout</button>
     </Panel>
   <Background />
+  <Controls />
+  <MiniMap />
 </SvelteFlow>
 </div>
