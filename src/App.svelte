@@ -1,20 +1,11 @@
 <script>
-  // import { Svelvet, ThemeToggle } from "svelvet";
-  // import PlanetsInFilms from "./lib/tables/Planets_in_films.svelte";
-  // import Films from "./lib/tables/Films.svelte";
-
-  import CodeMirror from "svelte-codemirror-editor";
-  import { python } from "@codemirror/lang-python";
-
-  let value = "";
+  import { Svelvet, ThemeToggle } from "svelvet";
+  import Cell from "./lib/components/Cell.svelte";
 </script>
 
-<CodeMirror bind:value lang={python()} />
-
-<!-- <body>
+<body>
   <Svelvet fitView controls minimap>
-    <PlanetsInFilms />
-    <Films />
+    <Cell />
     <ThemeToggle main="dark" alt="light" slot="toggle" />
   </Svelvet>
 </body>
@@ -30,4 +21,4 @@
     padding: 0;
     margin: 0;
   }
-</style> -->
+</style>
