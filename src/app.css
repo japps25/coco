@@ -1,5 +1,4 @@
 :root {
-
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -29,13 +28,10 @@
     border: none;
     line-height: 1.4;
     width: 225px;
-    box-shadow:
-      0 4px 6px -1px rgb(0 0 0 / 15%),
-      0 2px 4px -1px rgb(0 0 0 / 8%);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
   }
 
   :global(.annotation .svelte-flow__handle) {
     display: none;
-}
-
+  }
 }
