@@ -2,12 +2,10 @@
   import { writable } from "svelte/store";
   import dagre from "@dagrejs/dagre";
   import { SvelteFlow, Panel, Background, Controls, MiniMap, Position, type Node, type Edge } from "@xyflow/svelte";
-
   import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
+  import { initialNodes, initialEdges } from "./nodes-and-edges";
 
   import "@xyflow/svelte/dist/style.css";
-
-  import { initialNodes, initialEdges } from "./nodes-and-edges";
 
   const nodeTypes = {
     selectorNode: CodeEditorNode,
