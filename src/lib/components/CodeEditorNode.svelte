@@ -2,7 +2,6 @@
   import { Handle, Position, type NodeProps } from "@xyflow/svelte";
   import CodeMirror from "svelte-codemirror-editor";
   import Icon from "./Icon.svelte";
-  import { trapFocus } from "./actions";
   import { python } from "@codemirror/lang-python";
   type $$Props = NodeProps;
 
@@ -29,7 +28,7 @@
   let value = "import pandas as pd\nimport numpy as np\n\nprint('Hello World')";
 </script>
 
-<Handle type="target" position={Position.Left} style="background: #555;" {isConnectable} />
+<Handle type="target" position={Position.Left} style="" {isConnectable} />
 <div class="editor-wrapper">
   <div class="header">
     {#if show}
@@ -60,7 +59,7 @@
   </div>
 
   {#if show}
-    <div class="editor" use:trapFocus>
+    <div class="editor" on:keydown={(e) => e.stopPropagation()}>
       <CodeMirror
         bind:value
         lang={python()}
@@ -90,7 +89,6 @@
     align-items: center;
     padding: 0.5rem 1rem;
     background-color: #2d2d2d;
-    border-bottom: 1px solid #3d3d3d;
   }
 
   .cell-name {
