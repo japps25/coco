@@ -8,13 +8,6 @@ import '@xyflow/svelte/dist/style.css';
 
 export const initialNodes: Node[] = [
   {
-    id: '1',
-    type: 'dragHandleNode',
-    data: { label: 'An input node' },
-    position: { x: 0, y: 50 },
-    sourcePosition: Position.Right
-  },
-  {
     id: '2',
     type: 'selectorNode',
     data: { color: bgColor },
@@ -25,7 +18,7 @@ export const initialNodes: Node[] = [
 ];
 
 export const initialEdges: Edge[] = [
-  {
+ /*  {
     id: 'e1-2',
     source: '1',
     target: '2',
@@ -47,5 +40,5 @@ export const initialEdges: Edge[] = [
     sourceHandle: 'b',
     animated: true,
     style: 'stroke: #fff;'
-  }
+  } */
 ];
