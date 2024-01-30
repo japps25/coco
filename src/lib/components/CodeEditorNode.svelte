@@ -30,9 +30,9 @@
 </script>
 
 <Handle type="target" position={Position.Left} style="" {isConnectable} />
-<div class="editor-wrapper">
-  <div class="header">
-    <span class="cell-core">
+<div class="coco-editor__cell-wrapper">
+  <div class="coco-editor__header">
+    <span class="coco-editor__cell-core">
       {#if show}
         <button class="icon-wrapper" on:click={toggleShow}>
           <Icon name="chevron-down" />
@@ -42,11 +42,17 @@
           <Icon name="chevron-right" />
         </button>
       {/if}
-      <input type="text" bind:value={cellName} placeholder="New Cell" class="cell-name" />
+      <input
+        type="text"
+        bind:value={cellName}
+        placeholder="New Cell"
+        class="coco-editor__cell-name"
+        on:keydown={(e) => e.stopPropagation()}
+      />
     </span>
 
     {#if show}
-      <span class="buttons">
+      <span class="coco-editor__cell-buttons">
         <button class="icon-wrapper" on:click={handleRun}>
           <Icon name="play" />
         </button>
@@ -78,7 +84,7 @@
 </div>
 
 <style>
-  .editor-wrapper {
+  .coco-editor__cell-wrapper {
     display: flex;
     flex-direction: column;
     background-color: #1e1e1e;
@@ -86,18 +92,18 @@
     overflow: hidden;
   }
 
-  .header {
+  .coco-editor__header {
     display: flex;
     align-items: center;
     padding: 0.5rem 1rem;
     background-color: #2d2d2d;
   }
 
-  .cell-core {
+  .coco-editor__cell-core {
     display: flex;
   }
 
-  .cell-name {
+  .coco-editor__cell-name {
     background-color: transparent;
     border: none;
     border-radius: 0.4rem;
@@ -110,12 +116,12 @@
     padding: 0.4rem;
   }
 
-  .cell-name:hover {
+  .coco-editor__cell-name:hover {
     cursor: pointer;
     background-color: #3d3d3d;
   }
 
-  .buttons {
+  .coco-editor__cell-buttons {
     display: flex;
     align-items: center;
     margin-left: auto;
