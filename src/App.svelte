@@ -3,12 +3,12 @@
   import dagre from "@dagrejs/dagre";
   import { SvelteFlow, Panel, Background, Controls, MiniMap, Position, type Node, type Edge } from "@xyflow/svelte";
   import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
-  import { initialNodes, initialEdges } from "./nodes-and-edges";
+  import CommandMenu from "./lib/components/CommandMenu.svelte";
 
   import "@xyflow/svelte/dist/style.css";
-  import ColorSelectorNode from "./lib/components/ColorSelectorNode.svelte";
 
   const nodeTypes = {
+    commandMenu: CommandMenu,
     selectorNode: CodeEditorNode,
   };
 
@@ -50,17 +50,45 @@
     return { nodes, edges };
   }
 
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
+  let currentId = 0;
 
-  const nodes = writable<Node[]>(layoutedNodes);
-  const edges = writable<Edge[]>(layoutedEdges);
+  const nodes = writable<Node[]>([]);
+  const edges = writable<Edge[]>([]);
 
   function onLayout(direction: string) {
     const layoutedElements = getLayoutedElements($nodes, $edges, direction);
     $nodes = layoutedElements.nodes;
     $edges = layoutedElements.edges;
   }
+
+  function handleKeydown(event: KeyboardEvent) {
+    switch (event.code) {
+      case "Tab":
+        event.preventDefault();
+        nodes.update((nodes) => [
+          ...nodes,
+          { id: `node-${currentId++}`, type: "selectorNode", data: { label: `Node ${currentId++}` }, position: { x: 250, y: 5 } },
+        ]);
+        break;
+      case "Space":
+        event.preventDefault();
+        break;
+      case "Backspace":
+        event.preventDefault();
+        break;
+      case "KeyR":
+        event.preventDefault();
+        break;
+      case "KeyL":
+        event.preventDefault();
+        break;
+      default:
+        break;
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <div style="height:100vh;">
   <SvelteFlow {nodes} {edges} {nodeTypes} style="background: {$bgColor}" fitView>
