@@ -6,6 +6,7 @@
   import { initialNodes, initialEdges } from "./nodes-and-edges";
 
   import "@xyflow/svelte/dist/style.css";
+  import ColorSelectorNode from "./lib/components/ColorSelectorNode.svelte";
 
   const nodeTypes = {
     selectorNode: CodeEditorNode,
@@ -56,22 +57,19 @@
 
   function onLayout(direction: string) {
     const layoutedElements = getLayoutedElements($nodes, $edges, direction);
-
     $nodes = layoutedElements.nodes;
     $edges = layoutedElements.edges;
-    // nodes.set(layoutedElements.nodes);
-    // edges.set(layoutedElements.edges);
   }
 </script>
 
 <div style="height:100vh;">
   <SvelteFlow {nodes} {edges} {nodeTypes} style="background: {$bgColor}" fitView>
-    <Panel position="top-right">
+    <!-- <Panel position="top-right">
       <button on:click={() => onLayout("TB")}>vertical layout</button>
       <button on:click={() => onLayout("LR")}>horizontal layout</button>
-    </Panel>
+    </Panel> -->
     <Background />
     <Controls />
-    <MiniMap />
+    <!-- <MiniMap /> -->
   </SvelteFlow>
 </div>
