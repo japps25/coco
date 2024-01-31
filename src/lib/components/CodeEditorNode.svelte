@@ -4,6 +4,7 @@
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
 
+
   type $$Props = NodeProps;
 
   export let isConnectable: $$Props["isConnectable"];
@@ -27,9 +28,13 @@
   let cellName = "";
   let show = true;
   let value = "print('Hello Coco! 🥥')";
+
+  
 </script>
 
-<Handle type="target" position={Position.Left} style="" {isConnectable} />
+
+
+<Handle type="target" position={Position.Top} style="" {isConnectable} />
 <div class="coco-editor__cell-wrapper">
   <div class="coco-editor__header">
     <span class="coco-editor__cell-core">
@@ -66,6 +71,8 @@
     {/if}
   </div>
 
+  
+
   {#if show}
     <div class="editor" on:keydown={(e) => e.stopPropagation()}>
       <CodeMirror
@@ -82,6 +89,7 @@
     </div>
   {/if}
 </div>
+<Handle type="source" position={Position.Bottom}/>
 
 <style>
   .coco-editor__cell-wrapper {
