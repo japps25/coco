@@ -1,12 +1,14 @@
 <script lang="ts">
     import { writable } from 'svelte/store';
-
     import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
     import CommandMenu from "./lib/components/CommandMenu.svelte";
     import ELK from 'elkjs/lib/elk.bundled.js';
-    
+    import type { EdgeMarker } from '@xyflow/svelte';
+ 
+  
     import {
       SvelteFlow,
+      MarkerType,
       Background,
       Position,
       ConnectionLineType,
@@ -25,10 +27,15 @@
         commandMenu: CommandMenu,
         selectorNode: CodeEditorNode,
     };
-    
-    const position = { x: 0, y: 0 };
-    const edgeType = 'bezier';
 
+    const edgeType = {
+      type: 'smoothstep',
+      style: 'stroke-width: 5px; stroke: #FF4000', 
+      animated : false,
+    }
+    
+    const bgColor = writable("#0c0e12 ");
+   
   
     const nodeDefaults = {
         sourcePosition: Position.Right,
@@ -41,15 +48,15 @@
       id: '0',
       type: 'selectorNode',
       data: { label: 'Node' },
-      position: { x: 0, y: 50 },
+      position: { x: 0, y: 0 },
         ...nodeDefaults,
         connectable: true
     }
   ];
 
-    export const initialEdges: Edge[] = [];
-
-
+    export const initialEdges: Edge[] = [
+      
+    ];
   
     const nodes = writable<Node[]>([]);
     const edges = writable<Edge[]>([]);
@@ -85,7 +92,11 @@
           width: 400,
           height: 50
         })),
-        edges: edges
+        edges: edges,
+        edgesOptions: {
+          'elk.edgeRouting': 'ORTHOGONAL',
+          'elk.layered.spacing.edgeEdgeBetweenLayers': '100'
+        }
       };
   
       return elk
@@ -104,7 +115,7 @@
     }
 
     //add a new cell to the last element on the graph 
-    function addNewGraphElement(nodeType: string = 'selectorNode', edgeType: string = 'bezier') {
+    function addNewGraphElement(nodeType: string = 'selectorNode') {
       const lastNode = $nodes[$nodes.length - 1];
       const lastEdge = $edges[$edges.length - 1];
       const newId = parseInt(lastNode.id) + 1;
@@ -112,7 +123,7 @@
         id: newId.toString(),
         type: nodeType,
         data: { label: `Node ${newId}` },
-        position: { x: lastNode.position.x + 100, y: lastNode.position.y + 100 },
+        position: { x: lastNode.position.x , y: lastNode.position.y + 100 },
         ...nodeDefaults, 
         connectable: true
       };
@@ -120,7 +131,9 @@
         id: `e${newId - 1}${newId}`,
         source: lastNode.id,
         target: newNode.id,
-        type: edgeType
+        type: 'smoothstep',
+        style: 'stroke-width: 5px; stroke: #FF4000', 
+        animated : false,
       };
       $nodes = [...$nodes, newNode];
       $edges = [...$edges, newEdge];
@@ -163,6 +176,7 @@
 </script>
 
 
+
 <svelte:window on:keydown={handleKeydown} />
 
 <div style="height:100vh;">
@@ -171,13 +185,18 @@
     {edges}
     {nodeTypes}
     fitView
->
+    connectionLineType={ConnectionLineType.Step}   
+    defaultEdgeOptions={{ type: 'smoothstep',   style: 'stroke-width: 5px; stroke: #FF4000',}}
+    style="background: {$bgColor}" 
+    >
     <Panel position="top-right">
-    <button on:click={() => onLayout('DOWN')}>vertical layout</button>
-    <button on:click={() => onLayout('RIGHT')}>horizontal layout</button>
+    <button on:click={() => onLayout('DOWN')}>Reset layout</button>
     </Panel>
+    
     <Background />
 </SvelteFlow>
+
 </div>
+
 
   

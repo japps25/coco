@@ -34,7 +34,7 @@
 
 
 
-<Handle type="target" position={Position.Top} style="" {isConnectable} />
+<Handle type="target" position={Position.Left} style="" {isConnectable} />
 <div class="coco-editor__cell-wrapper">
   <div class="coco-editor__header">
     <span class="coco-editor__cell-core">
@@ -89,7 +89,8 @@
     </div>
   {/if}
 </div>
-<Handle type="source" position={Position.Bottom}/>
+<Handle type="source" position={Position.Left}/>
+
 
 <style>
   .coco-editor__cell-wrapper {
