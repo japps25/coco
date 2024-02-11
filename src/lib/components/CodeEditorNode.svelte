@@ -5,19 +5,14 @@
   import { KernelMessage, Kernel } from "@jupyterlab/services";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
-
-  let kernel: Kernel.IKernelConnection;
-
-  onMount(async () => {
-    // Connect to a Jupyter server.
-    baseUrl: "http://localhost:8888";
-
-    // start a new server
-  });
+  import { requestAPI } from "./handler";
 
   type $$Props = NodeProps;
 
   export let isConnectable: $$Props["isConnectable"];
+  let cellName = "";
+  let show = true;
+  let value = "print('Hello Coco!')";
 
   const toggleShow = (): void => {
     show = !show;
@@ -25,11 +20,19 @@
 
   const handleRun = (): void => {
     console.log("run");
-    //execute a jupyter notebook cell
-    const handleRun = (): void => {
-      console.log("Running cell...");
 
-   };
+    requestAPI("run", {
+      method: "POST",
+      body: JSON.stringify({
+        code: value,
+      }),
+    })
+      .then((response: any) => {
+        console.log(response);
+      })
+      .catch((error: any) => {
+        console.error(error);
+      });
   };
 
   const handleClear = (): void => {
@@ -40,14 +43,9 @@
     console.log("delete");
   };
 
-  let cellName = "";
-  let show = true;
-  let value = "print('Hello Coco! 🥥')";
-  let endpoint= "";
-
-  // Assume `cellCode` is the code from the cell you want to execute
-  const executeCell = {};
-
+  onMount(() => {
+    // console.log("mounted");
+  });
 </script>
 
 <Handle type="target" position={Position.Left} style="" {isConnectable} />
