@@ -2,7 +2,7 @@
 
 // https://discourse.jupyter.org/t/custom-front-end-talking-to-remote-ipython-kernel-blank-response-instead-of-execute-reply/15229/2
 
-const address = "http://localhost:8888/?token=122d3e15eb597d308473bdb71c21837595a4a501a879ef31";
+const address = "http://localhost:8888/?token=da08be7b14615553a11c96f0708dec663a311c16202fa543";
 const host = address.split("/?token=")[0];
 const token = address.split("/?token=")[1];
 
@@ -45,7 +45,7 @@ class JupyManager {
     this.connect();
   }
 
-  getDefaultHeaders = () => {
+  __getDefaultHeaders__ = () => {
     return {
       "Access-Control-Allow-Origin": "*",
       "X-XSRFToken": this.xsrfToken,
@@ -55,11 +55,11 @@ class JupyManager {
     };
   };
 
-  __doGet = async (path) => {
+  __get__ = async (path) => {
     try {
       const res = await fetch(`${this.host}${path}`, {
         method: "GET",
-        headers: this.getDefaultHeaders(),
+        headers: this.__getDefaultHeaders__(),
       });
 
       if (!res.ok) {
@@ -73,11 +73,11 @@ class JupyManager {
     }
   };
 
-  __doPost = async (path, body) => {
+  __post__ = async (path, body) => {
     try {
       const res = await fetch(`${this.host}${path}`, {
         method: "POST",
-        headers: this.getDefaultHeaders(),
+        headers: this.__getDefaultHeaders__(),
         body: JSON.stringify(body),
       });
 
@@ -92,11 +92,30 @@ class JupyManager {
     }
   };
 
-  __doDelete = async (path) => {
+  __patch__ = async (path, body) => {
+    try {
+      const res = await fetch(`${this.host}${path}`, {
+        method: "PATCH",
+        headers: this.__getDefaultHeaders__(),
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error(`${path}: PATCH request failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      throw new Error(err);
+    }
+  };
+
+  __delete__ = async (path) => {
     try {
       const res = await fetch(`${this.host}${path}`, {
         method: "DELETE",
-        headers: this.getDefaultHeaders(),
+        headers: this.__getDefaultHeaders__(),
       });
 
       if (!res.ok) {
@@ -131,28 +150,84 @@ class JupyManager {
     }
   };
 
-  api = async () => {
-    return this.__doGet("/api");
+  getApi = async () => {
+    return this.__get__("/api");
   };
 
   listSessions = async () => {
-    return this.__doGet("/api/sessions");
+    return this.__get__("/api/sessions");
   };
 
-  postSession = async (body) => {
-    return this.__doPost("/api/sessions", body);
+  addSession = async (body) => {
+    return this.__post__("/api/sessions", body);
+  };
+
+  getSession = async (sessionId) => {
+    return this.__get__(`/api/sessions/${sessionId}`);
+  };
+
+  updateSession = async (sessionId, body) => {
+    return this.__patch__(`/api/sessions/${sessionId}`, body);
+  };
+
+  deleteSession = async (sessionId) => {
+    return this.__delete__(`/api/sessions/${sessionId}`);
   };
 
   listKernels = async () => {
-    return this.__doGet("/api/kernels");
+    return this.__get__("/api/kernels");
   };
 
-  postKernel = async (body) => {
-    return this.__doPost("/api/kernels", body);
+  addKernel = async (body) => {
+    return this.__post__("/api/kernels", body);
+  };
+
+  getKernel = async (kernelId) => {
+    return this.__get__(`/api/kernels/${kernelId}`);
   };
 
   deleteKernel = async (kernelId) => {
-    return this.__doDelete(`/api/kernels/${kernelId}`);
+    return this.__delete__(`/api/kernels/${kernelId}`);
+  };
+
+  interruptKernel = async (kernelId) => {
+    return this.__post__(`/api/kernels/${kernelId}/interrupt`);
+  };
+
+  restartKernel = async (kernelId) => {
+    return this.__post__(`/api/kernels/${kernelId}/restart`);
+  };
+
+  getKernelSpecs = async () => {
+    return this.__get__("/api/kernelspecs");
+  };
+
+  listTerminals = async () => {
+    return this.__get__("/api/terminals");
+  };
+
+  addTerminal = async () => {
+    return this.__post__("/api/terminals");
+  };
+
+  getTerminal = async (terminalId) => {
+    return this.__get__(`/api/terminals/${terminalId}`);
+  };
+
+  updateTerminal = async (terminalId, body) => {
+    return this.__patch__(`/api/terminals/${terminalId}`, body);
+  };
+
+  deleteTerminal = async (terminalId) => {
+    return this.__delete__(`/api/terminals/${terminalId}`);
+  };
+
+  getMe = async () => {
+    return this.__get__("/api/me");
+  };
+
+  getStatus = async () => {
+    return this.__get__("/api/status");
   };
 }
 
