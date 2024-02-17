@@ -598,14 +598,13 @@ class Kernel {
    * Create the kernel websocket connection and add socket status handlers.
    */
   _createSocket() {
-    // let partialUrl = utils.urlPathJoin(this._wsUrl, KERNEL_SERVICE_URL, encodeURIComponent(this._id));
-    // // Strip any authentication from the display string.
-    // let parsed = utils.urlParse(partialUrl);
-    // console.log("Starting websocket", parsed.hostname);
+    let partialUrl = utils.urlPathJoin(this._wsUrl, KERNEL_SERVICE_URL, encodeURIComponent(this._id));
+    // Strip any authentication from the display string.
+    let parsed = utils.urlParse(partialUrl);
+    console.log("Starting websocket", parsed.hostname);
 
-    // let url = utils.urlPathJoin(partialUrl, "channels?session_id=" + encodeURIComponent(this._clientId));
+    let url = utils.urlPathJoin(partialUrl, "channels?session_id=" + encodeURIComponent(this._clientId));
 
-    let url = this._wsUrl;
     // if token authentication is in use
     if (this._token !== "") {
       url = url + `&token=${encodeURIComponent(this._token)}`;
