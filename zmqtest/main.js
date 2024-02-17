@@ -222,11 +222,16 @@ function RunCode(id, code) {
 
   manager.getKernel(id).then((kernel) => {
     let future = kernel.requestExecute({ code: code });
-    future.onReply = function (reply) {
-      console.log("Got execute reply");
-    };
-    future.onDone = function () {
-      console.log("Future is fulfilled");
+    // future.onReply = function (reply) {
+    //   console.log("Got execute reply");
+    // };
+    // future.onDone = function () {
+    //   console.log("Future is fulfilled");
+    // };
+    future.onIOPub = function (msg) {
+      // if (msg && msg.content && msg.content.text) {
+      console.log(msg.content);
+      // }
     };
   });
 }
