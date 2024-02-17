@@ -1,19 +1,6 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
-// import {
-//     DisposableDelegate
-//   } from '@phosphor/disposable';
-
 const { DisposableDelegate } = require("@phosphor/disposable");
 
-//   import {
-//     Kernel
-//   } from './kernel';
-
-//   import {
-//     KernelMessage
-//   } from './messages';
+const KernelMessage = require("./kernelMessage");
 
 class KernelFutureHandler extends DisposableDelegate {
   /**

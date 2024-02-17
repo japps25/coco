@@ -7,6 +7,7 @@ const signaling = require("@phosphor/signaling");
 
 const KernelMessage = require("./kernelMessage");
 const kernelFuture = require("./kernelFuture");
+const validate = require("./kernelValidate");
 
 const utils = require("./utils");
 
