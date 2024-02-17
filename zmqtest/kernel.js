@@ -1238,15 +1238,11 @@ class KernelPrivate {
     } catch (e) {
       return Promise.reject(e);
     }
-    return (
-      new Promise() <
-      any >
-      ((resolve, reject) => {
-        future.onReply = (reply) => {
-          resolve(reply);
-        };
-      })
-    );
+    return new Promise((resolve, reject) => {
+      future.onReply = (reply) => {
+        resolve(reply);
+      };
+    });
   }
 }
 
