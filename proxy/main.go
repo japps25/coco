@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
+	"time"
+
+	"github.com/go-zeromq/zmq4"
 )
 
 type Kernel struct {
@@ -57,7 +62,7 @@ func CreateNewKernel(hostname string, token string, cookie string, kernel *Kerne
 	}
 
 	if resp.StatusCode != 201 {
-		return fmt.Errorf("server returned non-200 status: %s", resp.Status)
+		return fmt.Errorf("server returned non-201 status: %s", resp.Status)
 	}
 
 	bodyBytes := make([]byte, 2000)
@@ -70,10 +75,8 @@ func CreateNewKernel(hostname string, token string, cookie string, kernel *Kerne
 	}
 
 	return nil
-
 }
 
-// get kernel specs
 func GetKernelSpecs(hostname string, token string, cookie string) error {
 
 	req, err := http.NewRequest("GET", hostname+"/api/kernelspecs", nil)
@@ -105,52 +108,67 @@ func GetKernelSpecs(hostname string, token string, cookie string) error {
 }
 
 func Run() error {
-	// Connect to the Jupyter kernel's shell socket
-	// shellSocket, err := zmq4.NewDealer(shellSocketAddr)
+
+	ctx := context.Background()
+	socket := zmq4.NewReq(ctx, zmq4.WithDialerRetry(time.Second))
+	defer socket.Close()
+
+	fmt.Printf("Connecting to hello world server...")
+	if err := socket.Dial("tcp://localhost:8888"); err != nil {
+		return fmt.Errorf("dialing: %w", err)
+	}
+
+	// // Subscribe to all messages on the IOPub socket
+	// iopubSocket.SetSubscribe("")
+
+	// // Prepare the execute request
+	// executeRequest := map[string]interface{}{
+	// 	"header": map[string]interface{}{
+	// 		"msg_id":   "<UUID>",
+	// 		"msg_type": "execute_request",
+	// 	},
+	// 	"metadata": map[string]interface{}{},
+	// 	"content": map[string]interface{}{
+	// 		"code":             "print('Hello from Jupyter!')",
+	// 		"silent":           false,
+	// 		"store_history":    true,
+	// 		"user_expressions": map[string]interface{}{},
+	// 		"allow_stdin":      true,
+	// 	},
+	// }
+
+	// // Serialize the execute request
+	// executeRequestBytes, err := json.Marshal(executeRequest)
 	// if err != nil {
-	// 	log.Fatalln(err)
+	// 	panic(err)
 	// }
-	// defer shellSocket.Close()
 
-	// // Connect to the Jupyter kernel's IOPub socket
-	// iopubSocket, err := zmq4.NewSubscriber(iopubSocketAddr)
+	// // Send the execute request
+	// _, err = shellSocket.SendMessage(executeRequestBytes)
 	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	// defer iopubSocket.Close()
-
-	// // Subscribe to all topics on the IOPub socket
-	// iopubSocket.SetOption(zmq4.SUBSCRIBE, "")
-
-	// Prepare the execute_request message
-	// messageParts := [][]byte{
-	// 	[]byte(""),                          // ZMQ Identity
-	// 	[]byte("<IDS|MSG>"),                 // Delimiter
-	// 	[]byte(""),                          // HMAC Signature
-	// 	[]byte(`{"msg_id": "unique-uuid"}`), // Header
-	// 	[]byte("{}"),                        // Parent Header
-	// 	[]byte("{}"),                        // Metadata
-	// 	[]byte(`{"code": "print('Hello, World!')"}`), // Content
+	// 	panic(err)
 	// }
 
-	// // Send the execute_request message
-	// err = shellSocket.SendMessage(messageParts...)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// Wait for the response from the IOPub socket
+	// // Receive and handle messages from the IOPub socket
 	// for {
-	// 	msg, err := iopubSocket.RecvMultipartMessageBytes(0)
+	// 	message, err := iopubSocket.RecvMessage(0)
 	// 	if err != nil {
-	// 		log.Fatalln(err)
+	// 		panic(err)
 	// 	}
 
-	// 	// Check if the message is an execute_result or an error
-	// 	if len(msg) >  3 && string(msg[0] == "execute_result" {
-	// 		fmt.Println("Received execute_result:", string(msg[3]
-	// 	} else if len(msg) >  3 && string(msg[0](https://github.com/gopherdata/gophernotes)) == "error" {
-	// 		fmt.Println("An error occurred:", string(msg[3]
+	// 	// Process the message
+	// 	switch message {
+	// 	case "execute_result":
+	// 		// Handle the result
+	// 		fmt.Println("Execution result received: ", string(message))
+	// 	case "stream":
+	// 		// Handle stream content
+	// 		fmt.Println("Stream content: ", string(message))
+	// 	case "error":
+	// 		// Handle errors
+	// 		fmt.Println("Error occurred during execution: ", string(message))
+	// 	default:
+	// 		fmt.Println("Unknown message type: ", message)
 	// 	}
 	// }
 
@@ -158,27 +176,50 @@ func Run() error {
 }
 
 func main() {
-	hostname := strings.Split(os.Args[1], "/?token=")[0]
-	token := strings.Split(os.Args[1], "/?token=")[1]
+	// var err error
+	// hostname := strings.Split(os.Args[1], "/?token=")[0]
+	// token := strings.Split(os.Args[1], "/?token=")[1]
 
-	cookie, err := GetServerXSRFCookie(hostname, token)
+	// cookie, err := GetServerXSRFCookie(hostname, token)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
+
+	// var kernel Kernel
+	// err = CreateNewKernel(hostname, token, cookie, &kernel)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
+
+	// fmt.Println("Kernel created: ", kernel)
+
+	// err = Run()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// run a simple python script
+	cmd := exec.Command("python")
+	cmd.Stdout = os.Stdout
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
-	var kernel Kernel
-	err = CreateNewKernel(hostname, token, cookie, &kernel)
+	err = cmd.Start()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
-	fmt.Println(kernel.Id)
+	stdin.Write([]byte("print('Hello from Go!')"))
 
-	err = GetKernelSpecs(hostname, token, cookie)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// err = cmd.Wait()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// cmd.Stdin.Read([]byte("print('Hello from Go!')"))
+
 }
