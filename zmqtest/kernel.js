@@ -6,6 +6,8 @@ const disposable = require("@phosphor/disposable");
 const signaling = require("@phosphor/signaling");
 
 const KernelMessage = require("./kernelMessage");
+const kernelFuture = require("./kernelFuture");
+
 const utils = require("./utils");
 
 /**
@@ -246,7 +248,7 @@ class Kernel {
     } else {
       this._ws.send(utils.serialize(msg));
     }
-    let future = new KernelFutureHandler(
+    let future = new kernelFuture.KernelFutureHandler(
       () => {
         this._futures.delete(msg.header.msg_id);
       },
@@ -911,15 +913,6 @@ class KernelPrivate {
     this._runningKernels = [];
     this._specs = Object.create(null);
   }
-  /**
-   * A module private store for running kernels.
-   */
-  // export const runningKernels: DefaultKernel[] = [];
-
-  /**
-   * A module private store of kernel specs by base url.
-   */
-  // export const specs: { [key] } = Object.create(null);
 
   addKernel(kernel) {
     this._runningKernels.push(kernel);
