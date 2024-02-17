@@ -1,39 +1,8 @@
-// const zmq = require("zeromq");
-
 // https://discourse.jupyter.org/t/custom-front-end-talking-to-remote-ipython-kernel-blank-response-instead-of-execute-reply/15229/2
 
-const address = "http://localhost:8888/?token=da08be7b14615553a11c96f0708dec663a311c16202fa543";
-const host = address.split("/?token=")[0];
-const token = address.split("/?token=")[1];
+const address = "http://localhost:8888/?token=fa5b5fbb7cec37109f2fe8f9ec53f43e287f6fe22aa82301";
 
-// async function runClient() {
-//   const sock = new zmq.Request();
-
-//   sock.connect("tcp://localhost:8888");
-//   console.log("Producer bound to port 8888");
-
-//   await sock.send("4");
-//   const [result] = await sock.receive();
-
-//   console.log(result);
-// }
-
-// async function runWorker() {
-//   const sock = new zmq.Push();
-
-//   await sock.bind("tcp://localhost:8888");
-//   console.log("Producer bound to port 8888");
-
-//   while (true) {
-//     await sock.send("some work");
-//     await new Promise((resolve) => {
-//       setTimeout(resolve, 500);
-//     });
-//   }
-// }
-
-// runClient();
-// runWorker();
+const Kernel = require("./kernel.js");
 
 class JupyManager {
   constructor(address) {
@@ -41,6 +10,8 @@ class JupyManager {
     this.host = address.split("/?token=")[0];
     this.token = address.split("/?token=")[1];
     this.xsrfToken = "";
+
+    this.kernels = [];
 
     this.connect();
   }
@@ -179,15 +150,25 @@ class JupyManager {
   };
 
   addKernel = async (body) => {
-    return this.__post__("/api/kernels", body);
+    const kernel = await this.__post__("/api/kernels", body);
+    this.kernels.push(new Kernel(kernel.id, kernel.name, kernel.execution_state));
+    return kernel;
   };
 
   getKernel = async (kernelId) => {
-    return this.__get__(`/api/kernels/${kernelId}`);
+    let kernel = this.kernels.find((kernel) => kernel.kernelId === kernelId);
+    if (kernel) {
+      return kernel;
+    }
+
+    kernel = await this.__get__(`/api/kernels/${kernelId}`);
+    this.kernels.push(new Kernel(kernel.id, kernel.name, kernel.execution_state));
+    return kernel;
   };
 
   deleteKernel = async (kernelId) => {
-    return this.__delete__(`/api/kernels/${kernelId}`);
+    this.__delete__(`/api/kernels/${kernelId}`);
+    this.kernels = this.kernels.filter((kernel) => kernel.kernelId !== kernelId);
   };
 
   interruptKernel = async (kernelId) => {
@@ -222,6 +203,10 @@ class JupyManager {
     return this.__delete__(`/api/terminals/${terminalId}`);
   };
 
+  getConfig = async (section) => {
+    return this.__get__(`/api/config/${section}`);
+  };
+
   getMe = async () => {
     return this.__get__("/api/me");
   };
@@ -231,4 +216,93 @@ class JupyManager {
   };
 }
 
+// import { KernelMessage, Kernel } from "@jupyterlab/services";
+
+// const Kernel = require("@jupyterlab/services").Kernel;
+// const KernelMessage = require("@jupyterlab/services").KernelMessage;
+
+// The base url of the notebook server.
+// const BASE_URL = "http://localhost:8888";
+
+// Get a list of available kernels and connect to one.
+// Kernel.listRunning({ baseUrl: BASE_URL }).then((kernelModels) => {
+//   let options = {
+//     baseUrl: BASE_URL,
+//     name: kernelModels[0].name,
+//   };
+//   Kernel.connectTo(kernelModels[0].id, options).then((kernel) => {
+//     console.log(kernel.name);
+//   });
+// });
+
+// // Get info about the available kernels and start a new one.
+// Kernel.getSpecs({ baseUrl: BASE_URL }).then((kernelSpecs) => {
+//   console.log("Default spec:", kernelSpecs.default);
+//   console.log("Available specs", Object.keys(kernelSpecs.kernelspecs));
+//   // use the default name
+//   let options = {
+//     baseUrl: BASE_URL,
+//     name: kernelSpecs.default,
+//   };
+//   Kernel.startNew(options).then((kernel) => {
+//     // Execute and handle replies.
+//     let future = kernel.requestExecute({ code: "a = 1" });
+//     future.onDone = () => {
+//       console.log("Future is fulfilled");
+//     };
+//     future.onIOPub = (msg) => {
+//       console.log(msg.content); // Print rich output data.
+//     };
+
+//     // Restart the kernel and then send an inspect message.
+//     kernel.restart().then(() => {
+//       let request = {
+//         code: "hello",
+//         cursor_pos: 4,
+//         detail_level: 0,
+//       };
+//       kernel.requestInspect(request).then((reply) => {
+//         console.log(reply.content.data);
+//       });
+//     });
+
+//     // Interrupt the kernel and then send a complete message.
+//     kernel.interrupt().then(() => {
+//       kernel.requestComplete({ code: "impor", cursor_pos: 4 }).then((reply) => {
+//         console.log(reply.content.matches);
+//       });
+//     });
+
+//     // Register a callback for when the kernel changes state.
+//     kernel.statusChanged.connect((status) => {
+//       console.log("status", status);
+//     });
+
+//     // Kill the kernel.
+//     kernel.shutdown().then(() => {
+//       console.log("Kernel shut down");
+//     });
+//   });
+// });
+
 global.jupyManager = new JupyManager(address);
+
+// const { Kernel } = require("@jupyterlab/services");
+
+// // Define the URL of the Jupyter server
+// const serverSettings = {
+//   baseUrl: "http://localhost:8888", // Replace with your Jupyter server URL
+//   token: "fa5b5fbb7cec37109f2fe8f9ec53f43e287f6fe22aa82301", // Replace with your Jupyter server token
+// };
+
+// Define the ID of the kernel you want to connect to
+// const kernelId = "cc6a1237-d5a4-4c19-9fe5-fdcee8bf981b"; // Replace with your kernel ID
+
+// Connect to the kernel
+// Kernel.connectTo(kernelId, serverSettings).then((kernel) => {
+//   // Use the kernel to execute code
+//   const code = 'print("Hello, World!")';
+//   kernel.requestExecute({ code: code }).then((reply) => {
+//     console.log(reply);
+//   });
+// });
