@@ -1,4 +1,10 @@
-const JupyterServices = require("@jupyterlab/services");
+const jupyterServices = require("@jupyterlab/services");
+const WebSocket = require("ws");
+
+const algo = require("@phosphor/algorithm");
+const coreutils = require("@phosphor/coreutils");
+const disposable = require("@phosphor/disposable");
+const signaling = require("@phosphor/signaling");
 
 const utils = require("./utils");
 
@@ -32,9 +38,11 @@ class Kernel {
     this._commPromises = new Map();
     this._comms = new Map();
     this._createSocket();
-    this.terminated = new Signal(this);
+    this.terminated = new signaling.Signal(this);
 
-    Private.runningKernels.push(this);
+    this._private = new KernelPrivate();
+
+    this._private.addKernel(this);
   }
 
   /**
@@ -164,7 +172,7 @@ class Kernel {
       baseUrl: this._baseUrl,
       ajaxSettings: this.ajaxSettings,
     };
-    this._specPromise = Private.findSpecs(options).then((specs) => {
+    this._specPromise = this._private.findSpecs(options).then((specs) => {
       return specs.kernelspecs[this._name];
     });
     return this._specPromise;
@@ -207,8 +215,8 @@ class Kernel {
     this._commPromises = null;
     this._comms = null;
     this._targetRegistry = null;
-    ArrayExt.removeFirstOf(Private.runningKernels, this);
-    Signal.clearData(this);
+    algo.ArrayExt.removeFirstOf(this._private.runningKernels, this);
+    signaling.Signal.clearData(this);
   }
 
   /**
@@ -264,7 +272,7 @@ class Kernel {
    * request fails or the response is invalid.
    */
   interrupt() {
-    return Private.interruptKernel(this, this._baseUrl, this.ajaxSettings);
+    return this._private.interruptKernel(this, this._baseUrl, this.ajaxSettings);
   }
 
   /**
@@ -285,7 +293,7 @@ class Kernel {
   restart() {
     this._clearState();
     this._updateStatus("restarting");
-    return Private.restartKernel(this, this._baseUrl, this.ajaxSettings);
+    return this._private.restartKernel(this, this._baseUrl, this.ajaxSettings);
   }
 
   /**
@@ -329,7 +337,7 @@ class Kernel {
       return Promise.reject(new Error("Kernel is dead"));
     }
     this._clearState();
-    return Private.shutdownKernel(this.id, this._baseUrl, this.ajaxSettings);
+    return this._private.shutdownKernel(this.id, this._baseUrl, this.ajaxSettings);
   }
 
   /**
@@ -348,8 +356,8 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createShellMessage(options);
-    return Private.handleShellMessage(this, msg).then((reply) => {
+    let msg = jupyterServices.KernelMessage.createShellMessage(options);
+    return this._private.handleShellMessage(this, msg).then((reply) => {
       this._info = reply.content;
       return reply;
     });
@@ -371,8 +379,8 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    return this._private.handleShellMessage(this, msg);
   }
 
   /**
@@ -391,8 +399,8 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    return this._private.handleShellMessage(this, msg);
   }
 
   /**
@@ -411,8 +419,8 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    return this._private.handleShellMessage(this, msg);
   }
 
   /**
@@ -445,7 +453,7 @@ class Kernel {
       stop_on_error: false,
     };
     content = utils.extend(defaults, content);
-    let msg = JupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
 
@@ -465,8 +473,8 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    return this._private.handleShellMessage(this, msg);
   }
 
   /**
@@ -483,8 +491,8 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    return this._private.handleShellMessage(this, msg);
   }
 
   /**
@@ -503,7 +511,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = JupyterServices.KernelMessage.createMessage(options, content);
+    let msg = jupyterServices.KernelMessage.createMessage(options, content);
     if (!this._isReady) {
       this._pendingMessages.push(msg);
     } else {
@@ -535,7 +543,7 @@ class Kernel {
     if (future) {
       future.registerMessageHook(hook);
     }
-    return new DisposableDelegate(() => {
+    return new disposable.DisposableDelegate(() => {
       future = this._futures && this._futures.get(msgId);
       if (future) {
         future.removeMessageHook(hook);
@@ -559,7 +567,7 @@ class Kernel {
    */
   registerCommTarget(targetName, callback) {
     this._targetRegistry[targetName] = callback;
-    return new DisposableDelegate(() => {
+    return new disposable.DisposableDelegate(() => {
       if (!this.isDisposed) {
         delete this._targetRegistry[targetName];
       }
@@ -590,18 +598,22 @@ class Kernel {
    * Create the kernel websocket connection and add socket status handlers.
    */
   _createSocket() {
-    let partialUrl = utils.urlPathJoin(this._wsUrl, KERNEL_SERVICE_URL, encodeURIComponent(this._id));
-    // Strip any authentication from the display string.
-    let parsed = utils.urlParse(partialUrl);
-    console.log("Starting websocket", parsed.hostname);
+    // let partialUrl = utils.urlPathJoin(this._wsUrl, KERNEL_SERVICE_URL, encodeURIComponent(this._id));
+    // // Strip any authentication from the display string.
+    // let parsed = utils.urlParse(partialUrl);
+    // console.log("Starting websocket", parsed.hostname);
 
-    let url = utils.urlPathJoin(partialUrl, "channels?session_id=" + encodeURIComponent(this._clientId));
+    // let url = utils.urlPathJoin(partialUrl, "channels?session_id=" + encodeURIComponent(this._clientId));
+
+    let url = this._wsUrl;
     // if token authentication is in use
     if (this._token !== "") {
       url = url + `&token=${encodeURIComponent(this._token)}`;
     }
 
-    this._connectionPromise = new PromiseDelegate();
+    console.log("Starting websocket", url);
+
+    this._connectionPromise = new coreutils.PromiseDelegate();
     this._ws = new WebSocket(url);
 
     // Ensure incoming binary messages are not Blobs
@@ -733,7 +745,7 @@ class Kernel {
     }
     if (status !== this._status) {
       this._status = status;
-      Private.logKernelStatus(this);
+      this._private.logKernelStatus(this);
       this._statusChanged.emit(status);
       if (status === "dead") {
         this.dispose();
@@ -890,9 +902,360 @@ class Kernel {
   _pendingMessages = [];
   _connectionPromise = null;
   _specPromise = null;
-  _statusChanged = new Signal(this);
-  _iopubMessage = new Signal(this);
-  _unhandledMessage = new Signal(this);
+  _statusChanged = new signaling.Signal(this);
+  _iopubMessage = new signaling.Signal(this);
+  _unhandledMessage = new signaling.Signal(this);
+}
+
+class KernelPrivate {
+  constructor() {
+    this._runningKernels = [];
+    this._specs = Object.create(null);
+  }
+  /**
+   * A module private store for running kernels.
+   */
+  // export const runningKernels: DefaultKernel[] = [];
+
+  /**
+   * A module private store of kernel specs by base url.
+   */
+  // export const specs: { [key] } = Object.create(null);
+
+  addKernel(kernel) {
+    this._runningKernels.push(kernel);
+  }
+
+  /**
+   * Find a kernel by id.
+   */
+  findById(id, options) {
+    let kernel = find(runningKernels, (value) => {
+      return value.id === id;
+    });
+    if (kernel) {
+      return Promise.resolve(kernel.model);
+    }
+    return getKernelModel(id, options).catch(() => {
+      throw new Error(`No running kernel with id: ${id}`);
+    });
+  }
+
+  /**
+   * Get the cached kernel specs or fetch them.
+   */
+  findSpecs(options) {
+    let promise = specs[options.baseUrl];
+    if (promise) {
+      return promise;
+    }
+    return getSpecs(options);
+  }
+
+  /**
+   * Fetch all of the kernel specs.
+   *
+   * #### Notes
+   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
+   */
+  getSpecs(options = {}) {
+    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let url = utils.urlPathJoin(baseUrl, KERNELSPEC_SERVICE_URL);
+    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    ajaxSettings.method = "GET";
+    ajaxSettings.dataType = "json";
+    let promise = utils.ajaxRequest(url, ajaxSettings).then((success) => {
+      if (success.xhr.status !== 200) {
+        throw utils.makeAjaxError(success);
+      }
+      try {
+        return validate.validateSpecModels(success.data);
+      } catch (err) {
+        throw utils.makeAjaxError(success, err.message);
+      }
+    });
+    this._private.specs[baseUrl] = promise;
+    return promise;
+  }
+
+  /**
+   * Fetch the running kernels.
+   *
+   * #### Notes
+   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  listRunning(options = {}) {
+    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL);
+    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    ajaxSettings.method = "GET";
+    ajaxSettings.dataType = "json";
+    ajaxSettings.cache = false;
+
+    return utils.ajaxRequest(url, ajaxSettings).then((success) => {
+      if (success.xhr.status !== 200) {
+        throw utils.makeAjaxError(success);
+      }
+      if (!Array.isArray(success.data)) {
+        throw utils.makeAjaxError(success, "Invalid kernel list");
+      }
+      for (let i = 0; i < success.data.length; i++) {
+        try {
+          validate.validateModel(success.data[i]);
+        } catch (err) {
+          throw utils.makeAjaxError(success, err.message);
+        }
+      }
+      return updateRunningKernels(success.data);
+    }, onKernelError);
+  }
+
+  /**
+   * Update the running kernels based on new data from the server.
+   */
+  updateRunningKernels(kernels) {
+    each(runningKernels, (kernel) => {
+      let updated = find(kernels, (model) => {
+        if (kernel.id === model.id) {
+          return true;
+        }
+      });
+      // If kernel is no longer running on disk, emit dead signal.
+      if (!updated && kernel.status !== "dead") {
+        kernel.terminated.emit(void 0);
+        kernel.dispose();
+      }
+    });
+    return kernels;
+  }
+
+  /**
+   * Start a new kernel.
+   */
+  startNew(options) {
+    options = options || {};
+    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL);
+    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    ajaxSettings.method = "POST";
+    ajaxSettings.data = JSON.stringify({ name: options.name });
+    ajaxSettings.dataType = "json";
+    ajaxSettings.contentType = "application/json";
+    ajaxSettings.cache = false;
+
+    return utils.ajaxRequest(url, ajaxSettings).then((success) => {
+      if (success.xhr.status !== 201) {
+        throw utils.makeAjaxError(success);
+      }
+      validate.validateModel(success.data);
+      options = utils.copy(options);
+      options.name = success.data.name;
+      return new DefaultKernel(options, success.data.id);
+    }, onKernelError);
+  }
+
+  /**
+   * Connect to a running kernel.
+   *
+   * #### Notes
+   * If the kernel was already started via `startNewKernel`, the existing
+   * Kernel object info is used to create another instance.
+   *
+   * Otherwise, if `options` are given, we attempt to connect to the existing
+   * kernel found by calling `listRunningKernels`.
+   * The promise is fulfilled when the kernel is running on the server,
+   * otherwise the promise is rejected.
+   *
+   * If the kernel was not already started and no `options` are given,
+   * the promise is rejected.
+   */
+  connectTo(id, options) {
+    let kernel = find(runningKernels, (value) => {
+      return value.id === id;
+    });
+    if (kernel) {
+      return Promise.resolve(kernel.clone());
+    }
+
+    return getKernelModel(id, options)
+      .then((model) => {
+        options = utils.copy(options);
+        options.name = model.name;
+        return new DefaultKernel(options, id);
+      })
+      .catch(() => {
+        throw new Error(`No running kernel with id: ${id}`);
+      });
+  }
+
+  /**
+   * Shut down a kernel by id.
+   */
+  shutdown(id, options = {}) {
+    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    return shutdownKernel(id, baseUrl, ajaxSettings);
+  }
+
+  /**
+   * Restart a kernel.
+   */
+  restartKernel(kernel, baseUrl, ajaxSettings) {
+    if (kernel.status === "dead") {
+      return Promise.reject(new Error("Kernel is dead"));
+    }
+    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL, encodeURIComponent(kernel.id), "restart");
+    ajaxSettings = ajaxSettings || {};
+    ajaxSettings.method = "POST";
+    ajaxSettings.dataType = "json";
+    ajaxSettings.cache = false;
+
+    return utils.ajaxRequest(url, ajaxSettings).then((success) => {
+      if (success.xhr.status !== 200) {
+        throw utils.makeAjaxError(success);
+      }
+      try {
+        validate.validateModel(success.data);
+      } catch (err) {
+        throw utils.makeAjaxError(success, err.message);
+      }
+    }, onKernelError);
+  }
+
+  /**
+   * Interrupt a kernel.
+   */
+  interruptKernel(kernel, baseUrl, ajaxSettings) {
+    if (kernel.status === "dead") {
+      return Promise.reject(new Error("Kernel is dead"));
+    }
+    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL, encodeURIComponent(kernel.id), "interrupt");
+    ajaxSettings = ajaxSettings || {};
+    ajaxSettings.method = "POST";
+    ajaxSettings.dataType = "json";
+    ajaxSettings.cache = false;
+
+    return utils.ajaxRequest(url, ajaxSettings).then((success) => {
+      if (success.xhr.status !== 204) {
+        throw utils.makeAjaxError(success);
+      }
+    }, onKernelError);
+  }
+
+  /**
+   * Delete a kernel.
+   */
+  shutdownKernel(id, baseUrl, ajaxSettings) {
+    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL, encodeURIComponent(id));
+    ajaxSettings = ajaxSettings || {};
+    ajaxSettings.method = "DELETE";
+    ajaxSettings.dataType = "json";
+    ajaxSettings.cache = false;
+
+    return utils.ajaxRequest(url, ajaxSettings).then(
+      (success) => {
+        if (success.xhr.status !== 204) {
+          throw utils.makeAjaxError(success);
+        }
+        killKernels(id);
+      },
+      (error) => {
+        if (error.xhr.status === 404) {
+          let response = JSON.parse(error.xhr.responseText);
+          console.warn(response["message"]);
+          killKernels(id);
+        } else {
+          return onKernelError(error);
+        }
+      }
+    );
+  }
+
+  /**
+   * Kill the kernels by id.
+   */
+  killKernels(id) {
+    each(toArray(runningKernels), (kernel) => {
+      if (kernel.id === id) {
+        kernel.terminated.emit(void 0);
+        kernel.dispose();
+      }
+    });
+  }
+
+  /**
+   * Get a full kernel model from the server by kernel id string.
+   */
+  getKernelModel(id, options) {
+    options = options || {};
+    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL, encodeURIComponent(id));
+    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    ajaxSettings.method = "GET";
+    ajaxSettings.dataType = "json";
+    ajaxSettings.cache = false;
+
+    return utils.ajaxRequest(url, ajaxSettings).then((success) => {
+      if (success.xhr.status !== 200) {
+        throw utils.makeAjaxError(success);
+      }
+      let data = success.data;
+      try {
+        validate.validateModel(data);
+      } catch (err) {
+        throw utils.makeAjaxError(success, err.message);
+      }
+      return data;
+    }, this._private.onKernelError);
+  }
+
+  /**
+   * Log the current kernel status.
+   */
+  logKernelStatus(kernel) {
+    switch (kernel.status) {
+      case "idle":
+      case "busy":
+      case "unknown":
+        return;
+      default:
+        console.log(`Kernel: ${kernel.status} (${kernel.id})`);
+        break;
+    }
+  }
+
+  /**
+   * Handle an error on a kernel Ajax call.
+   */
+  onKernelError(error) {
+    let text = error.throwError || error.xhr.statusText || error.xhr.responseText;
+    let msg = `API request failed: ${text}`;
+    console.error(msg);
+    return Promise.reject(error);
+  }
+
+  /**
+   * Send a kernel message to the kernel and resolve the reply message.
+   */
+  handleShellMessage(kernel, msg) {
+    let future;
+    try {
+      future = kernel.sendShellMessage(msg, true);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return (
+      new Promise() <
+      any >
+      ((resolve, reject) => {
+        future.onReply = (reply) => {
+          resolve(reply);
+        };
+      })
+    );
+  }
 }
 
 module.exports = Kernel;

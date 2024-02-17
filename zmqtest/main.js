@@ -1,13 +1,13 @@
 // https://discourse.jupyter.org/t/custom-front-end-talking-to-remote-ipython-kernel-blank-response-instead-of-execute-reply/15229/2
 
-const address = "http://localhost:8888/?token=fa5b5fbb7cec37109f2fe8f9ec53f43e287f6fe22aa82301";
+const address = "http://localhost:8888/?token=dd7c708383c3433c2116dbe84787c801d3d5e51e44a859ca";
 
 const Kernel = require("./kernel.js");
 
 class JupyManager {
   constructor(address) {
     this.address = address;
-    this.host = address.split("/?token=")[0];
+    this.baseUrl = address.split("/?token=")[0];
     this.token = address.split("/?token=")[1];
     this.xsrfToken = "";
 
@@ -28,7 +28,7 @@ class JupyManager {
 
   __get__ = async (path) => {
     try {
-      const res = await fetch(`${this.host}${path}`, {
+      const res = await fetch(`${this.baseUrl}${path}`, {
         method: "GET",
         headers: this.__getDefaultHeaders__(),
       });
@@ -46,7 +46,7 @@ class JupyManager {
 
   __post__ = async (path, body) => {
     try {
-      const res = await fetch(`${this.host}${path}`, {
+      const res = await fetch(`${this.baseUrl}${path}`, {
         method: "POST",
         headers: this.__getDefaultHeaders__(),
         body: JSON.stringify(body),
@@ -65,7 +65,7 @@ class JupyManager {
 
   __patch__ = async (path, body) => {
     try {
-      const res = await fetch(`${this.host}${path}`, {
+      const res = await fetch(`${this.baseUrl}${path}`, {
         method: "PATCH",
         headers: this.__getDefaultHeaders__(),
         body: JSON.stringify(body),
@@ -84,7 +84,7 @@ class JupyManager {
 
   __delete__ = async (path) => {
     try {
-      const res = await fetch(`${this.host}${path}`, {
+      const res = await fetch(`${this.baseUrl}${path}`, {
         method: "DELETE",
         headers: this.__getDefaultHeaders__(),
       });
@@ -99,7 +99,7 @@ class JupyManager {
 
   connect = async () => {
     try {
-      const res = await fetch(`${this.host}/?token=${this.token}`, {
+      const res = await fetch(`${this.baseUrl}/?token=${this.token}`, {
         method: "GET",
         mode: "no-cors",
         headers: {
@@ -151,7 +151,7 @@ class JupyManager {
 
   addKernel = async (body) => {
     const kernel = await this.__post__("/api/kernels", body);
-    this.kernels.push(new Kernel(kernel.id, kernel.name, kernel.execution_state));
+    this.kernels.push(new Kernel({ baseUrl: this.baseUrl, token: this.token }, kernel.id));
     return kernel;
   };
 
