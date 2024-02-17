@@ -48,6 +48,20 @@ class Kernel {
     this._private.addKernel(this);
   }
 
+  // DEBUG
+  runCode(code) {
+    let future = this.requestExecute({ code: code });
+    // future.onReply = function (reply) {
+    //   console.log("Got execute reply");
+    // };
+    // future.onDone = function () {
+    //   console.log("Future is fulfilled");
+    // };
+    future.onIOPub = function (msg) {
+      console.log(msg.content);
+    };
+  }
+
   /**
    * A signal emitted when the kernel status changes.
    */
