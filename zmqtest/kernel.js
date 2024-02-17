@@ -1,4 +1,3 @@
-const jupyterServices = require("@jupyterlab/services");
 const WebSocket = require("ws");
 
 const algo = require("@phosphor/algorithm");
@@ -6,6 +5,7 @@ const coreutils = require("@phosphor/coreutils");
 const disposable = require("@phosphor/disposable");
 const signaling = require("@phosphor/signaling");
 
+const KernelMessage = require("./kernelMessage");
 const utils = require("./utils");
 
 /**
@@ -244,7 +244,7 @@ class Kernel {
     if (!this._isReady) {
       this._pendingMessages.push(msg);
     } else {
-      this._ws.send(serialize.serialize(msg));
+      this._ws.send(utils.serialize(msg));
     }
     let future = new KernelFutureHandler(
       () => {
@@ -356,7 +356,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createShellMessage(options);
+    let msg = KernelMessage.createShellMessage(options);
     return this._private.handleShellMessage(this, msg).then((reply) => {
       this._info = reply.content;
       return reply;
@@ -379,7 +379,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content);
     return this._private.handleShellMessage(this, msg);
   }
 
@@ -399,7 +399,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content);
     return this._private.handleShellMessage(this, msg);
   }
 
@@ -419,7 +419,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content);
     return this._private.handleShellMessage(this, msg);
   }
 
@@ -453,7 +453,7 @@ class Kernel {
       stop_on_error: false,
     };
     content = utils.extend(defaults, content);
-    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content);
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
 
@@ -473,7 +473,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content);
     return this._private.handleShellMessage(this, msg);
   }
 
@@ -491,7 +491,7 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content);
     return this._private.handleShellMessage(this, msg);
   }
 
@@ -511,11 +511,11 @@ class Kernel {
       username: this._username,
       session: this._clientId,
     };
-    let msg = jupyterServices.KernelMessage.createMessage(options, content);
+    let msg = KernelMessage.createMessage(options, content);
     if (!this._isReady) {
       this._pendingMessages.push(msg);
     } else {
-      this._ws.send(serialize.serialize(msg));
+      this._ws.send(utils.serialize(msg));
     }
   }
 
@@ -658,7 +658,7 @@ class Kernel {
       // If the socket is being closed, ignore any messages
       return;
     }
-    let msg = serialize.deserialize(evt.data);
+    let msg = utils.deserialize(evt.data);
     try {
       validate.validateMessage(msg);
     } catch (error) {
@@ -763,7 +763,7 @@ class Kernel {
     // after the message is sent so that if there is an exception,
     // the message is still pending.
     while (this._pendingMessages.length > 0) {
-      let msg = serialize.serialize(this._pendingMessages[0]);
+      let msg = utils.serialize(this._pendingMessages[0]);
       this._ws.send(msg);
       this._pendingMessages.shift();
     }
