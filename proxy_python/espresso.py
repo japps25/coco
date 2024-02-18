@@ -54,7 +54,7 @@ def publisher_thread():
     ctx = zmq.Context.instance()
 
     publisher = ctx.socket(zmq.PUB)
-    publisher.bind("tcp://*:6000")
+    publisher.bind("tcp://*:8888")
 
     # Prepare message parts
     header = {"msg_id": str(uuid4()), "msg_type": "execute_request"}

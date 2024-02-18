@@ -1,24 +1,50 @@
+#
+#   Request-reply client in Python
+#   Connects REQ socket to tcp://localhost:5559
+#   Sends "Hello" to server, expects "World" back
+#
+import hashlib
+import json
+from uuid import uuid4
 import zmq
 
+#  Prepare our context and sockets
+context = zmq.Context()
+socket = context.socket(zmq.REQ)
+socket.connect("tcp://localhost:5559")
 
-def main():
-    """ main method """
+# Prepare message parts
+header = {"msg_id": str(uuid4()), "msg_type": "execute_request"}
+parent_header = {}
+metadata = {}
+content = {
+    'code': 'print("Hello world!")',
+    'silent': False,
+    'store_history': True,
+    'user_expressions': {},
+    'allow_stdin': False,
+    'stop_on_error': True
+}
 
-    # Prepare our context and publisher
-    context = zmq.Context()
-    subscriber = context.socket(zmq.SUB)
-    subscriber.connect("tcp://localhost:5563")
-    subscriber.setsockopt(zmq.SUBSCRIBE, b"B")
-
-    while True:
-        # Read envelope with address
-        [address, contents] = subscriber.recv_multipart()
-        print(f"[{address}] {contents}")
-
-    # We never get here but clean up anyhow
-    subscriber.close()
-    context.term()
+# Create signature
+sign = (json.dumps(header) +
+        json.dumps(parent_header) +
+        json.dumps(metadata) +
+        json.dumps(content))
+hmac_digest = hashlib.sha256(sign.encode()).hexdigest()
 
 
-if __name__ == "__main__":
-    main()
+
+#  Do 10 requests, waiting each time for a response
+while True:
+    socket.send_multipart([b"", b"<IDS|MSG>", hmac_digest.encode(),
+                            json.dumps(header).encode(),
+                            json.dumps(parent_header).encode(),
+                            json.dumps(metadata).encode(),
+                            json.dumps(content).encode()])
+    
+    #  Get the reply.
+    message = socket.recv()
+    print(f"Received reply: {message}")
+
+    

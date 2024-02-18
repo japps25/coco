@@ -1,7 +1,3 @@
-# Simple request-reply broker
-#
-# Author: Lev Givon <lev(at)columbia(dot)edu>
-
 import zmq
 
 # Prepare our context and sockets
@@ -22,6 +18,7 @@ while True:
 
     if socks.get(frontend) == zmq.POLLIN:
         message = frontend.recv_multipart()
+        print(message)
         backend.send_multipart(message)
 
     if socks.get(backend) == zmq.POLLIN:
