@@ -2,11 +2,8 @@
   import { Handle, Position, type NodeProps } from "@xyflow/svelte";
   import CodeMirror from "svelte-codemirror-editor";
   import { onMount } from "svelte";
-  import { KernelMessage, Kernel } from "@jupyterlab/services";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
-
-  let kernel: Kernel.IKernelConnection;
 
   onMount(async () => {
     // Connect to a Jupyter server.
@@ -28,8 +25,7 @@
     //execute a jupyter notebook cell
     const handleRun = (): void => {
       console.log("Running cell...");
-
-   };
+    };
   };
 
   const handleClear = (): void => {
@@ -43,11 +39,6 @@
   let cellName = "";
   let show = true;
   let value = "print('Hello Coco! 🥥')";
-  let endpoint= "";
-
-  // Assume `cellCode` is the code from the cell you want to execute
-  const executeCell = {};
-
 </script>
 
 <Handle type="target" position={Position.Left} style="" {isConnectable} />

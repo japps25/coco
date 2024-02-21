@@ -28,7 +28,9 @@
     border: none;
     line-height: 1.4;
     width: 225px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 15%),
+      0 2px 4px -1px rgb(0 0 0 / 8%);
   }
 
   :global(.annotation .svelte-flow__handle) {
