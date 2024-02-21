@@ -1,3 +1,10 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Kernel } from "./kernel";
+
+import { KernelMessage } from "./messages";
+
 /**
  * Required fields for `IKernelHeader`.
  */
@@ -7,7 +14,7 @@ const HEADER_FIELDS = ["username", "version", "session", "msg_id", "msg_type"];
  * Requred fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
-const IOPUB_CONTENT_FIELDS = {
+const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
   stream: { name: "string", text: "string" },
   display_data: { data: "object", metadata: "object" },
   execute_input: { code: "string", execution_count: "number" },
@@ -25,7 +32,7 @@ const IOPUB_CONTENT_FIELDS = {
  * Validate a property as being on an object, and optionally
  * of a given type.
  */
-function validateProperty(object, name, typeName) {
+function validateProperty(object: any, name: string, typeName?: string): void {
   if (!object.hasOwnProperty(name)) {
     throw Error(`Missing property '${name}'`);
   }
@@ -51,7 +58,7 @@ function validateProperty(object, name, typeName) {
 /**
  * Validate the header of a kernel message.
  */
-function validateHeader(header) {
+function validateHeader(header: KernelMessage.IHeader): void {
   for (let i = 0; i < HEADER_FIELDS.length; i++) {
     validateProperty(header, HEADER_FIELDS[i], "string");
   }
@@ -60,20 +67,20 @@ function validateHeader(header) {
 /**
  * Validate a kernel message object.
  */
-function validateMessage(msg) {
+export function validateMessage(msg: KernelMessage.IMessage): void {
   validateProperty(msg, "metadata", "object");
   validateProperty(msg, "content", "object");
   validateProperty(msg, "channel", "string");
   validateHeader(msg.header);
   if (msg.channel === "iopub") {
-    validateIOPubContent(msg);
+    validateIOPubContent(msg as KernelMessage.IIOPubMessage);
   }
 }
 
 /**
  * Validate content an kernel message on the iopub channel.
  */
-function validateIOPubContent(msg) {
+function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
   if (msg.channel === "iopub") {
     let fields = IOPUB_CONTENT_FIELDS[msg.header.msg_type];
     // Check for unknown message type.
@@ -91,7 +98,7 @@ function validateIOPubContent(msg) {
 /**
  * Validate a `Kernel.IModel` object.
  */
-function validateModel(model) {
+export function validateModel(model: Kernel.IModel): void {
   validateProperty(model, "name", "string");
   validateProperty(model, "id", "string");
 }
@@ -99,7 +106,7 @@ function validateModel(model) {
 /**
  * Validate a server kernelspec model to a client side model.
  */
-function validateSpecModel(data) {
+export function validateSpecModel(data: any): Kernel.ISpecModel {
   let spec = data.spec;
   if (!spec) {
     throw new Error("Invalid kernel spec");
@@ -121,12 +128,12 @@ function validateSpecModel(data) {
 /**
  * Validate a `Kernel.ISpecModels` object.
  */
-function validateSpecModels(data) {
+export function validateSpecModels(data: any): Kernel.ISpecModels {
   if (!data.hasOwnProperty("kernelspecs")) {
     throw new Error("No kernelspecs found");
   }
   let keys = Object.keys(data.kernelspecs);
-  let kernelspecs = Object.create(null);
+  let kernelspecs: { [key: string]: Kernel.ISpecModel } = Object.create(null);
   let defaultSpec = data.default;
 
   for (let i = 0; i < keys.length; i++) {
@@ -151,11 +158,3 @@ function validateSpecModels(data) {
     kernelspecs,
   };
 }
-
-module.exports = {
-  validateMessage,
-  validateModel,
-  validateSpecModels,
-  validateSpecModel,
-  validateIOPubContent,
-};
