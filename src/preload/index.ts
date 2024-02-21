@@ -3,6 +3,9 @@ import { electronAPI } from "@electron-toolkit/preload";
 
 import { KernelManager } from "../proxy/manager";
 
+// Custom APIs for renderer
+const api = {};
+
 const url = "http://localhost:8888/?token=be4e669fd6353de730e828a236a5b3046b3fcc0cdc38c75f";
 const baseUrl = "http://localhost:8888";
 const token = url.split("token=")[1];
@@ -12,15 +15,13 @@ kernelManager
   .startNew({ name: "python3" })
   .then((kernel) => {
     console.log("Kernel started", kernel);
+
+    api["kernelManager"] = kernelManager;
+    api["kernel"] = kernel;
   })
   .catch((error) => {
     console.error("Failed to start kernel", error);
   });
-
-// Custom APIs for renderer
-const api = {
-  kernelManager: kernelManager,
-};
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
