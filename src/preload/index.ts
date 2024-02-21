@@ -8,10 +8,19 @@ const baseUrl = "http://localhost:8888";
 const token = url.split("token=")[1];
 
 const kernelManager = new KernelManager({ baseUrl: baseUrl, token: token });
-// const kernel = await kernelManager.startNew({ name: "python3" });
+kernelManager
+  .startNew({ name: "python3" })
+  .then((kernel) => {
+    console.log("Kernel started", kernel);
+  })
+  .catch((error) => {
+    console.error("Failed to start kernel", error);
+  });
 
 // Custom APIs for renderer
-const api = {};
+const api = {
+  kernelManager: kernelManager,
+};
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -20,7 +29,6 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
     contextBridge.exposeInMainWorld("api", api);
-    // contextBridge.exposeInMainWorld("kernel", kernel);
   } catch (error) {
     console.error(error);
   }
@@ -29,6 +37,4 @@ if (process.contextIsolated) {
   window.electron = electronAPI;
   // @ts-ignore (define in dts)
   window.api = api;
-  // @ts-ignore (define in dts)
-  // window.kernel = kernel;
 }
