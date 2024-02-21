@@ -7,7 +7,7 @@ import { JSONExt } from "@phosphor/coreutils";
 
 import { ISignal, Signal } from "@phosphor/signaling";
 
-import * as utils from ".utils";
+import * as utils from "./utils";
 
 import { IAjaxSettings } from "./utils";
 
