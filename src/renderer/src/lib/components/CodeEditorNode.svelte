@@ -2,10 +2,40 @@
   import { Handle, Position, type NodeProps } from "@xyflow/svelte";
   import CodeMirror from "svelte-codemirror-editor";
   import { onMount } from "svelte";
-  import { KernelMessage, Kernel } from "@jupyterlab/services";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
-  import { requestAPI } from "./handler";
+
+  const api = window.cocoServerApi as any;
+
+  let output = "";
+  const pubCallback = (msg: any) => {
+    // Check if msg.content is an array
+    if (Array.isArray(msg.content)) {
+      // Iterate over each item in the array
+      msg.content.forEach((item) => {
+        if (item.text) {
+          output += item.text;
+        }
+        if (item.data && item.data["text/plain"]) {
+          output += item.data["text/plain"];
+        }
+      });
+    } else {
+      if (msg.content.text) {
+        output += msg.content.text;
+      }
+      if (msg.content.data && msg.content.data["text/plain"]) {
+        output += msg.content.data["text/plain"];
+      }
+    }
+  };
+
+  onMount(async () => {
+    // Connect to a Jupyter server.
+    api.connectToJupyter("http://localhost:8888/?token=a968a03a491f64a3c49f1386db0f8c11f2707407e3147866");
+    await api.startKernel();
+    api.setPubCallback(pubCallback);
+  });
 
   type $$Props = NodeProps;
 
@@ -19,20 +49,7 @@
   };
 
   const handleRun = (): void => {
-    console.log("run");
-
-    requestAPI("run", {
-      method: "POST",
-      body: JSON.stringify({
-        code: value,
-      }),
-    })
-      .then((response: any) => {
-        console.log(response);
-      })
-      .catch((error: any) => {
-        console.error(error);
-      });
+    api.runCode(value);
   };
 
   const handleClear = (): void => {
@@ -43,9 +60,9 @@
     console.log("delete");
   };
 
-  onMount(() => {
-    // console.log("mounted");
-  });
+  let cellName = "";
+  let show = true;
+  let value = "print('Hello Coco! 🥥')";
 </script>
 
 <Handle type="target" position={Position.Left} style="" {isConnectable} />
@@ -98,6 +115,16 @@
           },
         }}
       />
+    </div>
+    <div id="output">
+      <textarea
+        id="output"
+        rows="10"
+        cols="50"
+        value={output}
+        style="background-color: #1e1e1e; color: #fff; border: none; outline: none; resize: none; width: 100%; height: 100%;"
+        readonly
+      ></textarea>
     </div>
   {/if}
 </div>

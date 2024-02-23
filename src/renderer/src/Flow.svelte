@@ -133,16 +133,14 @@
     const ns = useInitialNodes ? initialNodes : $nodes;
     const es = useInitialNodes ? initialEdges : $edges;
 
-    getLayoutedElements(ns, es, opts).then(
-      ({ nodes: layoutedNodes, edges: layoutedEdges }) => {
-        $nodes = layoutedNodes;
-        $edges = layoutedEdges;
+    getLayoutedElements(ns, es, opts).then(({ nodes: layoutedNodes, edges: layoutedEdges }) => {
+      $nodes = layoutedNodes;
+      $edges = layoutedEdges;
 
-        fitView();
+      fitView();
 
-        window.requestAnimationFrame(() => fitView());
-      }
-    );
+      window.requestAnimationFrame(() => fitView());
+    });
   }
 
   let currentId = 0;
@@ -162,12 +160,11 @@
   onMount(() => {
     onLayout("DOWN", true);
 
-    async() => {
+    async () => {
       const layoutedElements = await getLayoutedElements(initialNodes, initialEdges);
       nodes.set(layoutedElements.nodes);
       edges.set(layoutedElements.edges);
     };
-
   });
 </script>
 

@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-/proxy
-/services
+src/proxy_
+services
+out
