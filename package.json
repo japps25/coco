@@ -1,9 +1,9 @@
 {
-  "name": "electron-app",
+  "name": "coco-editor",
   "version": "1.0.0",
   "description": "An Electron application with Svelte and TypeScript",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "Jessica L. Apps",
   "homepage": "ttp://localhost:5173/",
   "scripts": {
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",

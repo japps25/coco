@@ -13,9 +13,6 @@
     if (Array.isArray(msg.content)) {
       // Iterate over each item in the array
       msg.content.forEach((item) => {
-        //const formattedOutput = JSON.stringify(item, null,  2);
-        //console.log(formattedOutput);
-        //output.innerHTML += formattedOutput;
         if (item.text) {
           output += item.text;
         }
@@ -33,17 +30,11 @@
     }
   };
 
-  (async () => {
+  onMount(async () => {
+    // Connect to a Jupyter server.
     api.connectToJupyter("http://localhost:8888/?token=a968a03a491f64a3c49f1386db0f8c11f2707407e3147866");
     await api.startKernel();
     api.setPubCallback(pubCallback);
-  })();
-
-  onMount(async () => {
-    // Connect to a Jupyter server.
-    baseUrl: "http://localhost:8888";
-
-    // start a new server
   });
 
   type $$Props = NodeProps;

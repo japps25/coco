@@ -1,8 +1,7 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
 import { KernelManager } from "../proxy/manager";
-import { Kernel } from "../proxy/kernel";
 import { DefaultKernel } from "../proxy/default";
 
 class CocoServerApi {
@@ -45,8 +44,6 @@ class CocoServerApi {
   }
 
   runCode(code: string): any {
-    console.log("Running code");
-
     let future = this.currentKernel?.requestExecute({ code: code });
     if (!future) {
       console.error("Error running code");
