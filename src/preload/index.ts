@@ -2,26 +2,76 @@ import { contextBridge } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
 import { KernelManager } from "../proxy/manager";
+import { Kernel } from "../proxy/kernel";
+import { DefaultKernel } from "../proxy/default";
 
-// Custom APIs for renderer
-const api = {};
+class CocoServerApi {
+  kernelManager: KernelManager | null;
+  currentKernel: DefaultKernel | null;
+  currentKernelId: string | null;
+  pubCallback: any;
 
-const url = "http://localhost:8888/?token=be4e669fd6353de730e828a236a5b3046b3fcc0cdc38c75f";
-const baseUrl = "http://localhost:8888";
-const token = url.split("token=")[1];
+  constructor() {
+    this.kernelManager = null;
+    this.currentKernel = null;
+    this.currentKernelId = null;
+    this.pubCallback = null;
+  }
 
-const kernelManager = new KernelManager({ baseUrl: baseUrl, token: token });
-kernelManager
-  .startNew({ name: "python3" })
-  .then((kernel) => {
+  connectToJupyter(url: string) {
+    console.log("Connecting to Jupyter");
+    const baseUrl = url.split("?")[0];
+    const token = url.split("token=")[1];
+
+    this.kernelManager = new KernelManager({ baseUrl: baseUrl, token: token });
+  }
+
+  async startKernel(): Promise<any> {
+    console.log("Starting kernel");
+    const kernel = await this.kernelManager?.startNew({ name: "python3" });
+    if (!kernel) {
+      console.error("Kernel not started");
+      return;
+    }
     console.log("Kernel started", kernel);
+    this.currentKernel = kernel as DefaultKernel;
+    this.currentKernelId = kernel?.id;
 
-    api["kernelManager"] = kernelManager;
-    api["kernel"] = kernel;
-  })
-  .catch((error) => {
-    console.error("Failed to start kernel", error);
-  });
+    return kernel;
+  }
+
+  setPubCallback(callback: any) {
+    this.pubCallback = callback;
+  }
+
+  runCode(code: string): any {
+    console.log("Running code");
+
+    let future = this.currentKernel?.requestExecute({ code: code });
+    if (!future) {
+      console.error("Error running code");
+      return;
+    }
+
+    future.onIOPub = function (msg: any) {
+      console.log(msg.content);
+      if (this.pubCallback) {
+        this.pubCallback(msg);
+      }
+    };
+
+    return future;
+  }
+}
+
+const cocoServerApi = new CocoServerApi();
+
+const api = {
+  connectToJupyter: cocoServerApi.connectToJupyter.bind(cocoServerApi),
+  startKernel: cocoServerApi.startKernel.bind(cocoServerApi),
+  runCode: cocoServerApi.runCode.bind(cocoServerApi),
+  setPubCallback: cocoServerApi.setPubCallback.bind(cocoServerApi),
+};
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -29,7 +79,7 @@ kernelManager
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
-    contextBridge.exposeInMainWorld("api", api);
+    contextBridge.exposeInMainWorld("cocoServerApi", api);
   } catch (error) {
     console.error(error);
   }
@@ -37,5 +87,5 @@ if (process.contextIsolated) {
   // @ts-ignore (define in dts)
   window.electron = electronAPI;
   // @ts-ignore (define in dts)
-  window.api = api;
+  window.cocoServerApi = api;
 }
