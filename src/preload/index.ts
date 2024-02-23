@@ -5,9 +5,6 @@ import { KernelManager } from "../proxy/manager";
 import { Kernel } from "../proxy/kernel";
 import { DefaultKernel } from "../proxy/default";
 
-
-
-
 class CocoServerApi {
   kernelManager: KernelManager | null;
   currentKernel: DefaultKernel | null;
@@ -49,20 +46,21 @@ class CocoServerApi {
 
   runCode(code: string): any {
     console.log("Running code");
-  
+
     let future = this.currentKernel?.requestExecute({ code: code });
     if (!future) {
       console.error("Error running code");
       return;
     }
-  
-    future.onIOPub = (msg: any) => { // Use an arrow function here
+
+    future.onIOPub = (msg: any) => {
+      // Use an arrow function here
       console.log(msg.content);
       if (this.pubCallback) {
         this.pubCallback(msg); // Now 'this' correctly refers to the class instance
       }
     };
-  
+
     return future;
   }
 }
@@ -91,6 +89,4 @@ if (process.contextIsolated) {
   window.electron = electronAPI;
   // @ts-ignore (define in dts)
   window.cocoServerApi = api;
-  
- 
 }

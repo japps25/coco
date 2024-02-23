@@ -5,6 +5,40 @@
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
 
+  const api = window.cocoServerApi as any;
+
+  let output = "";
+  const pubCallback = (msg: any) => {
+    // Check if msg.content is an array
+    if (Array.isArray(msg.content)) {
+      // Iterate over each item in the array
+      msg.content.forEach((item) => {
+        //const formattedOutput = JSON.stringify(item, null,  2);
+        //console.log(formattedOutput);
+        //output.innerHTML += formattedOutput;
+        if (item.text) {
+          output += item.text;
+        }
+        if (item.data && item.data["text/plain"]) {
+          output += item.data["text/plain"];
+        }
+      });
+    } else {
+      if (msg.content.text) {
+        output += msg.content.text;
+      }
+      if (msg.content.data && msg.content.data["text/plain"]) {
+        output += msg.content.data["text/plain"];
+      }
+    }
+  };
+
+  (async () => {
+    api.connectToJupyter("http://localhost:8888/?token=a968a03a491f64a3c49f1386db0f8c11f2707407e3147866");
+    await api.startKernel();
+    api.setPubCallback(pubCallback);
+  })();
+
   onMount(async () => {
     // Connect to a Jupyter server.
     baseUrl: "http://localhost:8888";
@@ -21,11 +55,7 @@
   };
 
   const handleRun = (): void => {
-    console.log("run");
-    //execute a jupyter notebook cell
-    const handleRun = (): void => {
-      console.log("Running cell...");
-    };
+    api.runCode(value);
   };
 
   const handleClear = (): void => {
@@ -91,6 +121,16 @@
           },
         }}
       />
+    </div>
+    <div id="output">
+      <textarea
+        id="output"
+        rows="10"
+        cols="50"
+        value={output}
+        style="background-color: #1e1e1e; color: #fff; border: none; outline: none; resize: none; width: 100%; height: 100%;"
+        readonly
+      ></textarea>
     </div>
   {/if}
 </div>
