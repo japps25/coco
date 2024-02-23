@@ -59,10 +59,6 @@
   const handleDelete = (): void => {
     console.log("delete");
   };
-
-  let cellName = "";
-  let show = true;
-  let value = "print('Hello Coco! 🥥')";
 </script>
 
 <Handle type="target" position={Position.Left} style="" {isConnectable} />
