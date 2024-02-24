@@ -20,6 +20,9 @@
   import "@xyflow/svelte/dist/style.css";
 
   import { onMount } from "svelte";
+  import TopBar from "./lib/components/TopBar.svelte";
+
+  let jupyterServerUrl: string;
 
   const nodeTypes = {
     commandMenu: CommandMenu,
@@ -188,7 +191,8 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div style="height:100vh;">
+<div style="height: 100vh">
+  <TopBar {jupyterServerUrl} />
   <SvelteFlow
     {nodes}
     {edges}
@@ -204,7 +208,5 @@
     <Panel position="top-right">
       <button on:click={() => onLayout("DOWN")}>Reset layout</button>
     </Panel>
-    <Background variant={BackgroundVariant.Dots} />
-    <Background />
   </SvelteFlow>
 </div>
