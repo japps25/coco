@@ -1,10 +1,13 @@
 <script lang="ts">
   import { Handle, Position, type NodeProps } from "@xyflow/svelte";
-  import CodeMirror from "svelte-codemirror-editor";
   import { onMount } from "svelte";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
 
+  // @ts-ignore
+  import CodeMirror from "svelte-codemirror-editor";
+
+  // @ts-ignore
   const api = window.cocoServerApi as any;
 
   let output = "";
@@ -32,7 +35,7 @@
 
   onMount(async () => {
     // Connect to a Jupyter server.
-    api.connectToJupyter("http://localhost:8888/?token=a968a03a491f64a3c49f1386db0f8c11f2707407e3147866");
+    api.connectToJupyter("http://localhost:8888/?token=4fbd0a6ec1ee910f63f08dadbd73ed6d935af63f1255436e");
     await api.startKernel();
     api.setPubCallback(pubCallback);
   });
