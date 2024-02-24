@@ -4,8 +4,16 @@
   import { onMount } from "svelte";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
+ 
 
   const api = window.cocoServerApi as any;
+
+  // Function to generate a unique ID
+  function generateUniqueId() {
+    return `editor-node-${Date.now()}-${Math.random().toString(36).substr(2,  9)}`;
+  }
+
+  let nodeId = generateUniqueId(); // Generate a unique ID for this editor node
 
   let output = "";
   const pubCallback = (msg: any) => {
@@ -32,9 +40,10 @@
 
   onMount(async () => {
     // Connect to a Jupyter server.
-    api.connectToJupyter("http://localhost:8888/?token=a968a03a491f64a3c49f1386db0f8c11f2707407e3147866");
+    api.connectToJupyter("http://localhost:8888/?token=27c0ebcece3e56d1a3d8339af69e759465df502a3268c5b7");
     await api.startKernel();
-    api.setPubCallback(pubCallback);
+    // Set the callback for this editor node
+    api.setPubCallback(nodeId, pubCallback);
   });
 
   type $$Props = NodeProps;
@@ -49,7 +58,7 @@
   };
 
   const handleRun = (): void => {
-    api.runCode(value);
+    api.runCode(nodeId, value);
   };
 
   const handleClear = (): void => {

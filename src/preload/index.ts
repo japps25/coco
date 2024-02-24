@@ -8,13 +8,14 @@ class CocoServerApi {
   kernelManager: KernelManager | null;
   currentKernel: DefaultKernel | null;
   currentKernelId: string | null;
-  pubCallback: any;
+  // pubCallback is a map to store callbacks for each editor node
+  pubCallbacks: Map<string, any>;
 
   constructor() {
     this.kernelManager = null;
     this.currentKernel = null;
     this.currentKernelId = null;
-    this.pubCallback = null;
+    this.pubCallbacks = new Map();
   }
 
   connectToJupyter(url: string) {
@@ -39,11 +40,12 @@ class CocoServerApi {
     return kernel;
   }
 
-  setPubCallback(callback: any) {
-    this.pubCallback = callback;
+  setPubCallback(nodeId: string, callback: any) {
+    // Store the callback with the nodeId as the key
+    this.pubCallbacks.set(nodeId, callback);
   }
 
-  runCode(code: string): any {
+  runCode(nodeId: string,code: string): any {
     let future = this.currentKernel?.requestExecute({ code: code });
     if (!future) {
       console.error("Error running code");
@@ -53,8 +55,9 @@ class CocoServerApi {
     future.onIOPub = (msg: any) => {
       // Use an arrow function here
       console.log(msg.content);
-      if (this.pubCallback) {
-        this.pubCallback(msg); // Now 'this' correctly refers to the class instance
+      const callback = this.pubCallbacks.get(nodeId);
+      if (callback) {
+        callback(msg); 
       }
     };
 
