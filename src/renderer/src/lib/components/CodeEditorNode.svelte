@@ -6,9 +6,10 @@
 
   // @ts-ignore
   import CodeMirror from "svelte-codemirror-editor";
+  import type { ICocoServerApi } from "../common";
 
   // @ts-ignore
-  const api = window.cocoServerApi as any;
+  const api = window.cocoServerApi as ICocoServerApi;
 
   // Function to generate a unique ID
   function generateUniqueId() {
@@ -16,9 +17,10 @@
   }
 
   let nodeId = generateUniqueId(); // Generate a unique ID for this editor node
+  let kernelId = ""; // The ID of the kernel that this editor node is connected to
 
   let output = "";
-  const pubCallback = (msg: any) => {
+  const pubCallback = (msg: any): void => {
     // Check if msg.content is an array
     if (Array.isArray(msg.content)) {
       // Iterate over each item in the array
@@ -42,8 +44,9 @@
 
   onMount(async () => {
     // Connect to a Jupyter server.
-    api.connectToJupyter("http://localhost:8888/?token=db2ba8cd1e3ef16d23bb3505e37ec654acf20b91ef3e1010");
-    await api.startKernel();
+    api.connectToJupyter("http://localhost:8888/?token=af81a93626083ee1496a14c23d51ab77c0f32b7f467db394");
+    await api.ready();
+    kernelId = await api.startNewKernel("python3");
     // Set the callback for this editor node
     api.setPubCallback(nodeId, pubCallback);
   });
@@ -61,7 +64,7 @@
 
   const handleRun = (): void => {
     output = "";
-    api.runCode(nodeId, value);
+    api.executeCode(kernelId, nodeId, value);
   };
 
   const handleClear = (): void => {
