@@ -43,7 +43,7 @@
 
   onMount(async () => {
     // Connect to a Jupyter server.
-    api.connectToJupyter("http://localhost:8888/?token=4fbd0a6ec1ee910f63f08dadbd73ed6d935af63f1255436e");
+    api.connectToJupyter("http://localhost:8888/?token=4359a016480cd8761c5509be8118122de269a80d5698f9fa");
     await api.startKernel();
     // Set the callback for this editor node
     api.setPubCallback(nodeId, pubCallback);
@@ -129,7 +129,7 @@
       <textarea
         id="output"
         rows="10"
-        cols="50"
+        cols="30"
         value={output}
         style="background-color: #1e1e1e; color: #fff; border: none; outline: none; resize: none; width: 100%; height: 100%;"
         readonly
