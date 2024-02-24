@@ -58,6 +58,7 @@
   };
 
   const handleRun = (): void => {
+    output = "";
     api.runCode(nodeId, value);
   };
 
