@@ -3,7 +3,6 @@
   import { onMount } from "svelte";
   import Icon from "./Icon.svelte";
   import { python } from "@codemirror/lang-python";
- 
 
   // @ts-ignore
   import CodeMirror from "svelte-codemirror-editor";
@@ -13,7 +12,7 @@
 
   // Function to generate a unique ID
   function generateUniqueId() {
-    return `editor-node-${Date.now()}-${Math.random().toString(36).substr(2,  9)}`;
+    return `editor-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   let nodeId = generateUniqueId(); // Generate a unique ID for this editor node
@@ -43,7 +42,7 @@
 
   onMount(async () => {
     // Connect to a Jupyter server.
-    api.connectToJupyter("http://localhost:8888/?token=4fbd0a6ec1ee910f63f08dadbd73ed6d935af63f1255436e");
+    api.connectToJupyter("http://localhost:8888/?token=db2ba8cd1e3ef16d23bb3505e37ec654acf20b91ef3e1010");
     await api.startKernel();
     // Set the callback for this editor node
     api.setPubCallback(nodeId, pubCallback);
