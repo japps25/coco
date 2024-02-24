@@ -1,7 +1,7 @@
 {
   "name": "coco-editor",
-  "version": "1.0.0",
-  "description": "An Electron application with Svelte and TypeScript",
+  "version": "0.1.0",
+  "description": "A new way to cocode 🥥",
   "main": "./out/main/index.js",
   "author": "Jessica L. Apps",
   "homepage": "ttp://localhost:5173/",
