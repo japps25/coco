@@ -2,51 +2,120 @@ import { contextBridge } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
 import { KernelManager } from "../proxy/manager";
-import { DefaultKernel } from "../proxy/default";
+import { Kernel } from "../proxy/kernel";
+
+interface ICocoServerApi {
+  /**
+   * Connect to a Jupyter server.
+   *
+   * @param url Jupyter server URL
+   */
+  connectToJupyter(url: string): void;
+
+  /**
+   * Check if the server is ready.
+   *
+   * @returns True if the server is ready, false otherwise
+   */
+  isReady(): boolean;
+
+  /**
+   * Wait for the server to be ready.
+   *
+   * @returns Promise that resolves when the server is ready
+   */
+  ready(): Promise<void>;
+
+  /**
+   * Start a new kernel.
+   *
+   * @param name Kernel name (e.g. "python3")
+   * @returns Promise that resolves to the kernel ID
+   */
+  startNewKernel(name: string): Promise<string>;
+
+  /**
+   * Execute code in a kernel.
+   *
+   * @param kernelId Kernel ID
+   * @param nodeId Node ID
+   * @param code Code to execute
+   * @returns Promise that resolves when the code has been executed
+   */
+  executeCode(kernelId: string, nodeId: string, code: string): Promise<void>;
+
+  /**
+   * Set a callback to be called when a message is received from a kernel.
+   *
+   * @param nodeId Node ID
+   * @param callback Callback function
+   */
+  setPubCallback(nodeId: string, callback: (msg: any) => void): void;
+}
 
 class CocoServerApi {
-  kernelManager: KernelManager | null;
-  currentKernel: DefaultKernel | null;
-  currentKernelId: string | null;
+  private kernelManager: KernelManager | null;
+
   // pubCallback is a map to store callbacks for each editor node
-  pubCallbacks: Map<string, any>;
+  private kernels: Map<string, Kernel.IKernel>;
+  private pubCallbacks: Map<string, (msg: any) => void>;
 
   constructor() {
     this.kernelManager = null;
-    this.currentKernel = null;
-    this.currentKernelId = null;
-    this.pubCallbacks = new Map();
+    this.kernels = new Map<string, Kernel.IKernel>();
+    this.pubCallbacks = new Map<string, (msg: any) => void>();
   }
 
-  connectToJupyter(url: string) {
-    console.log("Connecting to Jupyter");
+  connectToJupyter = (url: string): void => {
     const baseUrl = url.split("?")[0];
     const token = url.split("token=")[1];
 
     this.kernelManager = new KernelManager({ baseUrl: baseUrl, token: token });
-  }
+  };
 
-  async startKernel(): Promise<any> {
-    console.log("Starting kernel");
-    const kernel = await this.kernelManager?.startNew({ name: "python3" });
+  isReady = (): boolean => {
+    if (!this.kernelManager) {
+      return false;
+    }
+    return this.kernelManager.isReady;
+  };
+
+  ready = (): Promise<void> => {
+    if (!this.kernelManager) {
+      return Promise.reject("Kernel manager not initialized");
+    }
+    return this.kernelManager.ready;
+  };
+
+  startNewKernel = async (name: string = "python3"): Promise<string> => {
+    if (!this.isReady()) {
+      console.error("Kernel manager not ready");
+      return "";
+    }
+
+    const kernel = await this.kernelManager!.startNew({ name: name });
     if (!kernel) {
       console.error("Kernel not started");
-      return;
+      return "";
     }
-    console.log("Kernel started", kernel);
-    this.currentKernel = kernel as DefaultKernel;
-    this.currentKernelId = kernel?.id;
 
-    return kernel;
-  }
+    this.kernels.set(kernel.id, kernel);
+    return kernel.id;
+  };
 
-  setPubCallback(nodeId: string, callback: any) {
+  setPubCallback = (nodeId: string, callback: (msg: any) => void): void => {
     // Store the callback with the nodeId as the key
     this.pubCallbacks.set(nodeId, callback);
-  }
+  };
 
-  runCode(nodeId: string,code: string): any {
-    let future = this.currentKernel?.requestExecute({ code: code });
+  executeCode = async (kernelId: string, nodeId: string, code: string): Promise<void> => {
+    const kernel = this.kernels.get(kernelId);
+    if (!kernel) {
+      console.error(`Kernel ${kernelId} not found`);
+      return;
+    }
+
+    let future = kernel.requestExecute({ code: code });
     if (!future) {
       console.error("Error running code");
       return;
@@ -54,23 +123,22 @@ class CocoServerApi {
 
     future.onIOPub = (msg: any) => {
       // Use an arrow function here
-      console.log(msg.content);
       const callback = this.pubCallbacks.get(nodeId);
       if (callback) {
-        callback(msg); 
+        callback(msg);
       }
     };
-
-    return future;
-  }
+  };
 }
 
 const cocoServerApi = new CocoServerApi();
 
 const api = {
   connectToJupyter: cocoServerApi.connectToJupyter.bind(cocoServerApi),
-  startKernel: cocoServerApi.startKernel.bind(cocoServerApi),
-  runCode: cocoServerApi.runCode.bind(cocoServerApi),
+  isReady: cocoServerApi.isReady.bind(cocoServerApi),
+  ready: cocoServerApi.ready.bind(cocoServerApi),
+  startNewKernel: cocoServerApi.startNewKernel.bind(cocoServerApi),
+  executeCode: cocoServerApi.executeCode.bind(cocoServerApi),
   setPubCallback: cocoServerApi.setPubCallback.bind(cocoServerApi),
 };
 

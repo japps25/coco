@@ -6,11 +6,11 @@
   import {
     SvelteFlow,
     // MarkerType,
-    Background,
+    // Background,
     Position,
     ConnectionLineType,
-    BackgroundVariant,
-    Panel,
+    // BackgroundVariant,
+    // Panel,
     useSvelteFlow,
     type Node,
     type Edge,
@@ -93,9 +93,14 @@
       case "Backspace":
         event.preventDefault();
         break;
+<<<<<<< HEAD
       case "Delete":
         removeLastGraphElement();
         event.preventDefault();
+=======
+
+      default:
+>>>>>>> main
         break;
     }
   }
@@ -109,9 +114,7 @@
 
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<div style="height:100vh;">
+<div class="svelte-flow__background" on:keydown={handleKeydown} role="presentation">
   <SvelteFlow
     {nodes}
     {edges}
@@ -122,12 +125,74 @@
       type: "smoothstep",
       style: "stroke-width: 5px; stroke: #FF4000",
     }}
-    style="background: {$bgColor}"
+    style="background: {$bgColor}; margin-top: 2rem"
   >
+<<<<<<< HEAD
     <Panel position="top-right">
   
     </Panel>
     <Background variant={BackgroundVariant.Dots} />
     <Background />
+=======
+    <!-- <Panel position="top-right">
+      <button on:click={() => onLayout("DOWN")}>Reset layout</button>
+    </Panel> -->
+>>>>>>> main
   </SvelteFlow>
 </div>
+
+<style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+  }
+
+  .svelte-flow__background {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* .svelte-flow__node {
+    background-color: #1e1e1e;
+    border: 1px solid #2d2d2d;
+    border-radius: 0.4rem;
+    padding: 0.5rem;
+  }
+
+  .svelte-flow__node:hover {
+    border-color: #09d3ac;
+  }
+
+  .svelte-flow__node[data-selected] {
+    border-color: #09d3ac;
+  }
+
+  .svelte-flow__node[data-connectable] {
+    cursor: pointer;
+  }
+
+  .svelte-flow__node[data-connectable]:hover {
+    border-color: #09d3ac;
+  }
+
+  .svelte-flow__edge {
+    stroke: #09d3ac;
+    stroke-width: 2;
+  }
+
+  .svelte-flow__edge[data-selected] {
+    stroke: #09d3ac;
+  }
+
+  .svelte-flow__edge[data-animated] {
+    stroke-dasharray: 5;
+    animation: dash 1s linear infinite;
+  } */
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -10;
+    }
+  }
+</style>
