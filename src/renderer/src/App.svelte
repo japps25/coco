@@ -1,10 +1,12 @@
 <script lang="ts">
   import { SvelteFlowProvider } from "@xyflow/svelte";
   import Flow from "./Flow.svelte";
-
-  let jupyterServerUrl: string;
+  import TopBar from "./lib/components/TopBar.svelte";
 </script>
 
-<SvelteFlowProvider>
-  <Flow />
-</SvelteFlowProvider>
+<div>
+  <TopBar />
+  <SvelteFlowProvider>
+    <Flow />
+  </SvelteFlowProvider>
+</div>

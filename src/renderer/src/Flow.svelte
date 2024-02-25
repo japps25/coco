@@ -20,9 +20,6 @@
   import "@xyflow/svelte/dist/style.css";
 
   import { onMount } from "svelte";
-  import TopBar from "./lib/components/TopBar.svelte";
-
-  let jupyterServerUrl: string;
 
   const nodeTypes = {
     commandMenu: CommandMenu,
@@ -69,26 +66,6 @@
 
   const getLayoutedElements = async (nodes: Node[], edges: Edge[], options = {}): Promise<{ nodes: Node[]; edges: Edge[] }> => {
     const isHorizontal = options?.["elk.direction"] === "RIGHT";
-    // const graph = {
-    //   id: "root",
-    //   layoutOptions: options,
-    //   children: nodes.map((node) => ({
-    //     ...node,
-    //     // Adjust the target and source handle positions based on the layout
-    //     // direction.
-    //     targetPosition: isHorizontal ? Position.Left : Position.Top,
-    //     sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
-
-    //     // Hardcode a width and height for elk to use when layouting.
-    //     width: 400,
-    //     height: 50,
-    //   })),
-    //   edges: edges,
-    //   edgesOptions: {
-    //     "elk.edgeRouting": "ORTHOGONAL",
-    //     "elk.layered.spacing.edgeEdgeBetweenLayers": "100",
-    //   },
-    // };
 
     const layoutedGraph = await elk.layout({
       id: "root",
@@ -175,6 +152,9 @@
       case "Backspace":
         event.preventDefault();
         break;
+
+      default:
+        break;
     }
   }
 
@@ -189,10 +169,7 @@
   });
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<div style="height: 100vh">
-  <TopBar {jupyterServerUrl} />
+<div class="svelte-flow__background" on:keydown={handleKeydown} role="presentation">
   <SvelteFlow
     {nodes}
     {edges}
@@ -203,10 +180,66 @@
       type: "smoothstep",
       style: "stroke-width: 5px; stroke: #FF4000",
     }}
-    style="background: {$bgColor}"
+    style="background: {$bgColor}; margin-top: 2rem"
   >
-    <Panel position="top-right">
+    <!-- <Panel position="top-right">
       <button on:click={() => onLayout("DOWN")}>Reset layout</button>
-    </Panel>
+    </Panel> -->
   </SvelteFlow>
 </div>
+
+<style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+  }
+
+  .svelte-flow__background {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* .svelte-flow__node {
+    background-color: #1e1e1e;
+    border: 1px solid #2d2d2d;
+    border-radius: 0.4rem;
+    padding: 0.5rem;
+  }
+
+  .svelte-flow__node:hover {
+    border-color: #09d3ac;
+  }
+
+  .svelte-flow__node[data-selected] {
+    border-color: #09d3ac;
+  }
+
+  .svelte-flow__node[data-connectable] {
+    cursor: pointer;
+  }
+
+  .svelte-flow__node[data-connectable]:hover {
+    border-color: #09d3ac;
+  }
+
+  .svelte-flow__edge {
+    stroke: #09d3ac;
+    stroke-width: 2;
+  }
+
+  .svelte-flow__edge[data-selected] {
+    stroke: #09d3ac;
+  }
+
+  .svelte-flow__edge[data-animated] {
+    stroke-dasharray: 5;
+    animation: dash 1s linear infinite;
+  } */
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -10;
+    }
+  }
+</style>

@@ -43,12 +43,12 @@
   };
 
   onMount(async () => {
-    // Connect to a Jupyter server.
-    api.connectToJupyter("http://localhost:8888/?token=af81a93626083ee1496a14c23d51ab77c0f32b7f467db394");
-    await api.ready();
-    kernelId = await api.startNewKernel("python3");
-    // Set the callback for this editor node
-    api.setPubCallback(nodeId, pubCallback);
+    // // Connect to a Jupyter server.
+    // api.connectToJupyter("http://localhost:8888/?token=af81a93626083ee1496a14c23d51ab77c0f32b7f467db394");
+    // await api.ready();
+    // kernelId = await api.startNewKernel("python3");
+    // // Set the callback for this editor node
+    // api.setPubCallback(nodeId, pubCallback);
   });
 
   type $$Props = NodeProps;
