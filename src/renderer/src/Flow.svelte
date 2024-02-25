@@ -110,7 +110,9 @@
   });
 </script>
 
-<div class="svelte-flow__background" on:keydown={handleKeydown} role="presentation">
+<svelte:window on:keydown={handleKeydown} />
+
+<div class="svelte-flow__background" role="presentation">
   <SvelteFlow
     {nodes}
     {edges}
