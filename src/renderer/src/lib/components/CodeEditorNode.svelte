@@ -70,6 +70,7 @@
 
   const handleClear = (): void => {
     value = "";
+    output = "";
   };
 
   const handleDelete = (): void => {
