@@ -43,12 +43,8 @@
   };
 
   onMount(async () => {
-    // // Connect to a Jupyter server.
-    // api.connectToJupyter("http://localhost:8888/?token=af81a93626083ee1496a14c23d51ab77c0f32b7f467db394");
-    // await api.ready();
-    // kernelId = await api.startNewKernel("python3");
-    // // Set the callback for this editor node
-    // api.setPubCallback(nodeId, pubCallback);
+    // Set the callback for this editor node
+    api.setPubCallback(nodeId, pubCallback);
   });
 
   type $$Props = NodeProps;
@@ -62,7 +58,12 @@
     show = !show;
   };
 
-  const handleRun = (): void => {
+  const handleRun = async (): Promise<void> => {
+    if (kernelId === "") {
+      await api.ready();
+      kernelId = await api.startNewKernel("python3");
+    }
+
     output = "";
     api.executeCode(kernelId, nodeId, value);
   };
@@ -114,7 +115,7 @@
   </div>
 
   {#if show}
-    <div class="editor" on:keydown={(e) => e.stopPropagation()}>
+    <div class="editor" on:keydown={(e) => e.stopPropagation()} role="presentation">
       <CodeMirror
         bind:value
         lang={python()}
