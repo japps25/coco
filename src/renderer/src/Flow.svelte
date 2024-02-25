@@ -3,23 +3,12 @@
   import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
   import CommandMenu from "./lib/components/CommandMenu.svelte";
 
-  import {
-    SvelteFlow,
-    // MarkerType,
-    // Background,
-    Position,
-    ConnectionLineType,
-    // BackgroundVariant,
-    // Panel,
-    useSvelteFlow,
-    type Node,
-    type Edge,
-    Background,
-  } from "@xyflow/svelte";
+  import { SvelteFlow, Position, ConnectionLineType, useSvelteFlow, type Node, type Edge } from "@xyflow/svelte";
 
   import "@xyflow/svelte/dist/style.css";
 
   import { onMount } from "svelte";
+  import { CocoPipeline } from "./lib/components/Pipeline";
 
   const nodeTypes = {
     commandMenu: CommandMenu,
@@ -34,9 +23,18 @@
     deletable: false,
   };
 
+  let currentNodeId = 0;
+  let currentPipelineId = 0;
+  let currentPipeline = new CocoPipeline(`Pipeline ${currentPipelineId++}`, "", "");
+  const pipelines = new Array<CocoPipeline>();
+  pipelines.push(currentPipeline);
+
+  const firstNodeId = `node-${currentNodeId++}`;
+  currentPipeline.pushNodeId(firstNodeId);
+
   const initialNodes: Node[] = [
     {
-      id: "0",
+      id: firstNodeId,
       type: "selectorNode",
       data: { label: "Node" },
       position: { x: 0, y: 0 },
@@ -52,27 +50,31 @@
 
   const { fitView } = useSvelteFlow();
 
-  //add a new cell to the last element on the graph
-  function addNewGraphElement(nodeType: string = "selectorNode") {
+  // add a new cell to the last element on the graph
+  function addNewNode(nodeType: string = "selectorNode") {
     const lastNode = $nodes[$nodes.length - 1];
-    // const lastEdge = $edges[$edges.length - 1];
-    const newId = parseInt(lastNode.id) + 1;
+    const newId = `node-${currentNodeId++}`;
+    
+    currentPipeline.pushNodeId(newId);
+
     const newNode = {
       id: newId.toString(),
       type: nodeType,
-      data: { label: `Node ${newId}` },
+      data: { label: `Node ${currentNodeId}` },
       position: { x: lastNode.position.x, y: lastNode.position.y + 100 },
       ...nodeDefaults,
       connectable: true,
     };
+
     const newEdge = {
-      id: `e${newId - 1}${newId}`,
+      id: `e${lastNode.id}${newId}`,
       source: lastNode.id,
       target: newNode.id,
       type: "smoothstep",
       style: "stroke-width: 5px; stroke: #FF4000",
       animated: false,
     };
+
     $nodes = [...$nodes, newNode];
     $edges = [...$edges, newEdge];
   }
@@ -88,7 +90,7 @@
     switch (event.code) {
       case "ShiftLeft":
         event.preventDefault();
-        addNewGraphElement();
+        addNewNode();
         break;
       case "Backspace":
         event.preventDefault();

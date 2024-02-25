@@ -39,6 +39,10 @@ export class CocoPipeline {
     return this.description;
   }
 
+  pushNodeId(nodeId: string): void {
+    this.nodeIds.push(nodeId);
+  }
+
   runAll(): void {
     this.nodeIds.forEach((nodeId) => {
       api.executeCode(this.kernelId, nodeId, "run");

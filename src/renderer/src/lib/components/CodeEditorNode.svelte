@@ -52,7 +52,7 @@
   export let isConnectable: $$Props["isConnectable"];
   let cellName = "";
   let show = true;
-  let value = "print('Hello Coco!')";
+  let value = "print('Hello from Coco! 🥥')";
 
   const toggleShow = (): void => {
     show = !show;
