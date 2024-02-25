@@ -14,6 +14,7 @@
     useSvelteFlow,
     type Node,
     type Edge,
+    Background,
   } from "@xyflow/svelte";
 
   import "@xyflow/svelte/dist/style.css";
@@ -50,7 +51,6 @@
   const edges = writable<Edge[]>([]);
 
   const { fitView } = useSvelteFlow();
-  
 
   //add a new cell to the last element on the graph
   function addNewGraphElement(nodeType: string = "selectorNode") {
@@ -97,6 +97,8 @@
         removeLastGraphElement();
         event.preventDefault();
         break;
+      default:
+        break;
     }
   }
 
@@ -106,7 +108,6 @@
     fitView();
     window.requestAnimationFrame(() => fitView());
   });
-
 </script>
 
 <div class="svelte-flow__background" on:keydown={handleKeydown} role="presentation">
@@ -121,19 +122,7 @@
       style: "stroke-width: 5px; stroke: #FF4000",
     }}
     style="background: {$bgColor}; margin-top: 2rem"
-  >
-<<<<<<< HEAD
-    <Panel position="top-right">
-  
-    </Panel>
-    <Background variant={BackgroundVariant.Dots} />
-    <Background />
-=======
-    <!-- <Panel position="top-right">
-      <button on:click={() => onLayout("DOWN")}>Reset layout</button>
-    </Panel> -->
->>>>>>> main
-  </SvelteFlow>
+  />
 </div>
 
 <style>
