@@ -93,14 +93,9 @@
       case "Backspace":
         event.preventDefault();
         break;
-<<<<<<< HEAD
       case "Delete":
         removeLastGraphElement();
         event.preventDefault();
-=======
-
-      default:
->>>>>>> main
         break;
     }
   }
