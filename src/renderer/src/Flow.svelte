@@ -52,7 +52,7 @@
   const { fitView } = useSvelteFlow();
 
   //add a new cell to the last element on the graph
-  function addNewGraphElement(nodeType: string = "selectorNode") {
+  function addNewNode(nodeType: string = "selectorNode") {
     if ($nodes.length > 0) {
       const lastNode = $nodes[$nodes.length - 1];
       let newId = parseInt(lastNode.id);
