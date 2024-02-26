@@ -35,6 +35,14 @@ interface ICocoServerApi {
   startNewKernel(name: string): Promise<string>;
 
   /**
+   * Shutdown a kernel.
+   *
+   * @param kernelId Kernel ID
+   * @returns Promise that resolves when the kernel has been shutdown
+   */
+  shutdownKernel(kernelId: string): Promise<void>;
+
+  /**
    * Execute code in a kernel.
    *
    * @param kernelId Kernel ID
@@ -84,6 +92,7 @@ class CocoServerApi {
     if (!this.kernelManager) {
       return Promise.reject("Kernel manager not initialized");
     }
+
     return this.kernelManager.ready;
   };
 
@@ -101,6 +110,17 @@ class CocoServerApi {
 
     this.kernels.set(kernel.id, kernel);
     return kernel.id;
+  };
+
+  shutdownKernel = async (kernelId: string): Promise<void> => {
+    const kernel = this.kernels.get(kernelId);
+    if (!kernel) {
+      console.error(`Kernel ${kernelId} not found`);
+      return;
+    }
+
+    await kernel.shutdown();
+    this.kernels.delete(kernelId);
   };
 
   setPubCallback = (nodeId: string, callback: (msg: any) => void): void => {
@@ -138,6 +158,7 @@ const api = {
   isReady: cocoServerApi.isReady.bind(cocoServerApi),
   ready: cocoServerApi.ready.bind(cocoServerApi),
   startNewKernel: cocoServerApi.startNewKernel.bind(cocoServerApi),
+  shutdownKernel: cocoServerApi.shutdownKernel.bind(cocoServerApi),
   executeCode: cocoServerApi.executeCode.bind(cocoServerApi),
   setPubCallback: cocoServerApi.setPubCallback.bind(cocoServerApi),
 };

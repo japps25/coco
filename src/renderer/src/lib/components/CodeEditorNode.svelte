@@ -11,13 +11,8 @@
   // @ts-ignore
   const api = window.cocoServerApi as ICocoServerApi;
 
-  // Function to generate a unique ID
-  function generateUniqueId() {
-    return `editor-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  let nodeId = generateUniqueId(); // Generate a unique ID for this editor node
-  let kernelId = ""; // The ID of the kernel that this editor node is connected to
+  export const nodeId = "";
+  export const kernelId = ""; // The ID of the kernel that this editor node is connected to
 
   let output = "";
   const pubCallback = (msg: any): void => {
@@ -59,11 +54,6 @@
   };
 
   const handleRun = async (): Promise<void> => {
-    if (kernelId === "") {
-      await api.ready();
-      kernelId = await api.startNewKernel("python3");
-    }
-
     output = "";
     api.executeCode(kernelId, nodeId, value);
   };

@@ -29,6 +29,14 @@ export interface ICocoServerApi {
   startNewKernel(name: string): Promise<string>;
 
   /**
+   * Shutdown a kernel.
+   *
+   * @param kernelId Kernel ID
+   * @returns Promise that resolves when the kernel has been shutdown
+   */
+  shutdownKernel(kernelId: string): Promise<void>;
+
+  /**
    * Execute code in a kernel.
    *
    * @param kernelId Kernel ID

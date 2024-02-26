@@ -15,6 +15,7 @@
   let jupyterServerUrl: string;
   let connectionStatus = ConnectionStatus.DISCONNECTED;
 
+  // Connect to the Jupyter server when the user presses Enter
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Enter") {
       event.preventDefault();
