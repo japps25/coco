@@ -16,7 +16,7 @@
     return `editor-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  let nodeId = generateUniqueId(); // Generate a unique ID for this editor node
+  let callbackID = generateUniqueId(); // Generate a unique callback 
   let kernelId = ""; // The ID of the kernel that this editor node is connected to
 
   let output = "";
@@ -44,7 +44,7 @@
 
   onMount(async () => {
     // Set the callback for this editor node
-    api.setPubCallback(nodeId, pubCallback);
+    api.setPubCallback(callbackID, pubCallback);
   });
 
   type $$Props = NodeProps;
@@ -65,7 +65,7 @@
     }
 
     output = "";
-    api.executeCode(kernelId, nodeId, value);
+    api.executeCode(kernelId, callbackID, value);
   };
 
   const handleClear = (): void => {

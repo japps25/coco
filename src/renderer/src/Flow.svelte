@@ -2,6 +2,8 @@
   import { writable } from "svelte/store";
   import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
   import CommandMenu from "./lib/components/CommandMenu.svelte";
+  import {addNodeId, addEdgeId} from "./lib/utils/nodeUtils";
+
 
   import {
     SvelteFlow,
@@ -52,29 +54,40 @@
 
   const { fitView } = useSvelteFlow();
 
+
   //add a new cell to the last element on the graph
   function addNewGraphElement(nodeType: string = "selectorNode") {
-    const lastNode = $nodes[$nodes.length - 1];
-    // const lastEdge = $edges[$edges.length - 1];
-    const newId = parseInt(lastNode.id) + 1;
-    const newNode = {
-      id: newId.toString(),
-      type: nodeType,
-      data: { label: `Node ${newId}` },
-      position: { x: lastNode.position.x, y: lastNode.position.y + 100 },
-      ...nodeDefaults,
-      connectable: true,
-    };
-    const newEdge = {
-      id: `e${newId - 1}${newId}`,
-      source: lastNode.id,
-      target: newNode.id,
-      type: "smoothstep",
-      style: "stroke-width: 5px; stroke: #FF4000",
-      animated: false,
-    };
+    if ($nodes.length > 0) {
+      const lastNode = $nodes[$nodes.length - 1];
+      let newId = parseInt(lastNode.id);
+      addNodeId(newId.toString());
+
+      const newNode = {
+        id: newId.toString(),
+        type: nodeType,
+        data: { label: `Node ${newId}` },
+        position: { x: lastNode.position.x, y: lastNode.position.y + 100 },
+        ...nodeDefaults,
+        connectable: true,
+      };
+      const newEdge = {
+        id: `e${newId - 1}${newId}`,
+        source: lastNode.id,
+        target: newNode.id,
+        type: "smoothstep",
+        style: "stroke-width: 5px; stroke: #FF4000",
+        animated: false,
+      };
     $nodes = [...$nodes, newNode];
     $edges = [...$edges, newEdge];
+  }
+  else {
+    addNodeId("0");
+    addEdgeId("0");
+
+    $nodes = [...$nodes, initialNodes[0]];
+    $edges = [...$edges, initialEdges[0]];
+  }
   }
 
   function removeLastGraphElement() {
