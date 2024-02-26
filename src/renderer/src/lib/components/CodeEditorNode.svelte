@@ -39,7 +39,7 @@
 
   onMount(async () => {
     // Set the callback for this editor node
-    api.setPubCallback(nodeId, pubCallback);
+    api.setPubCallback(callbackID, pubCallback);
   });
 
   type $$Props = NodeProps;
@@ -55,7 +55,7 @@
 
   const handleRun = async (): Promise<void> => {
     output = "";
-    api.executeCode(kernelId, nodeId, value);
+    api.executeCode(kernelId, callbackID, value);
   };
 
   const handleClear = (): void => {
