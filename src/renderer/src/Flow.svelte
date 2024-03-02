@@ -1,129 +1,60 @@
 <script lang="ts">
+  import { SvelteFlow, ConnectionLineType } from "@xyflow/svelte";
   import { writable } from "svelte/store";
+  import { GraphManager } from "./graphManager";
   import CodeEditorNode from "./lib/components/CodeEditorNode.svelte";
   import CommandMenu from "./lib/components/CommandMenu.svelte";
-  import { addNodeId, addEdgeId } from "./lib/utils/nodeUtils";
-
-  import { SvelteFlow, Position, ConnectionLineType, useSvelteFlow, type Node, type Edge } from "@xyflow/svelte";
-
+  import { CustomEdge } from "./lib/components/CustomEdge.svelte";
   import "@xyflow/svelte/dist/style.css";
 
-  import { onMount } from "svelte";
-  import { CocoPipeline } from "./lib/components/Pipeline";
-
-  const nodeTypes = {
-    commandMenu: CommandMenu,
-    selectorNode: CodeEditorNode,
-  };
-
-  const bgColor = writable("#0c0e12 ");
-
-  const nodeDefaults = {
-    sourcePosition: Position.Right,
-    targetPosition: Position.Left,
-    deletable: false,
-  };
-
-  let currentNodeId = 0;
-  let currentPipelineId = 0;
-  let currentPipeline = new CocoPipeline(`Pipeline ${currentPipelineId++}`, "", "");
-  const pipelines = new Array<CocoPipeline>();
-  pipelines.push(currentPipeline);
-
-  const firstNodeId = `node-${currentNodeId++}`;
-  currentPipeline.pushNodeId(firstNodeId);
-
-  const initialNodes: Node[] = [
-    {
-      id: firstNodeId,
-      type: "selectorNode",
-      data: { label: "Node" },
-      position: { x: 0, y: 0 },
-      ...nodeDefaults,
-      connectable: true,
-    },
-  ];
-
-  export const initialEdges: Edge[] = [];
-
-  const nodes = writable<Node[]>([]);
-  const edges = writable<Edge[]>([]);
-
-  const { fitView } = useSvelteFlow();
-
-  //add a new cell to the last element on the graph
-  function addNewNode(nodeType: string = "selectorNode") {
-    if ($nodes.length > 0) {
-      const lastNode = $nodes[$nodes.length - 1];
-      let newId = parseInt(lastNode.id);
-      addNodeId(newId.toString());
-
-      const newNode = {
-        id: newId.toString(),
-        type: nodeType,
-        data: { label: `Node ${newId}` },
-        position: { x: lastNode.position.x, y: lastNode.position.y + 100 },
-        ...nodeDefaults,
-        connectable: true,
-      };
-      const newEdge = {
-        id: `e${newId - 1}${newId}`,
-        source: lastNode.id,
-        target: newNode.id,
-        type: "smoothstep",
-        style: "stroke-width: 5px; stroke: #FF4000",
-        animated: false,
-      };
-      $nodes = [...$nodes, newNode];
-      $edges = [...$edges, newEdge];
-    } else {
-      addNodeId("0");
-      addEdgeId("0");
-
-      $nodes = [...$nodes, initialNodes[0]];
-      $edges = [...$edges, initialEdges[0]];
-    }
-  }
-
+  /* 
   function removeLastGraphElement() {
     const lastNode = $nodes[$nodes.length - 1];
     const lastEdge = $edges[$edges.length - 1];
     $nodes = $nodes.filter((node) => node.id !== lastNode.id);
     $edges = $edges.filter((edge) => edge.id !== lastEdge.id);
-  }
+  } */
+
+  const nodeTypes = {
+    commandMenu: CommandMenu,
+    codeEditor: CodeEditorNode,
+  };
+
+  const edgeTypes = {
+    default: CustomEdge,
+  };
+
+  const graphManager = new GraphManager();
+  const bgColor = writable("#0c0e12 ");
 
   function handleKeydown(event: KeyboardEvent) {
     switch (event.code) {
       case "ShiftLeft":
         event.preventDefault();
-        addNewNode();
+        graphManager.addNewNode();
+        console.log("New Node added");
         break;
+
       case "Backspace":
         event.preventDefault();
         break;
+
       case "Delete":
-        removeLastGraphElement();
         event.preventDefault();
         break;
+
       default:
         break;
     }
   }
-
-  onMount(() => {
-    nodes.set(initialNodes);
-    edges.set(initialEdges);
-    fitView();
-    window.requestAnimationFrame(() => fitView());
-  });
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
 
 <div class="svelte-flow__background" role="presentation">
   <SvelteFlow
-    {nodes}
-    {edges}
+    nodes={graphManager.Nodes}
+    edges={graphManager.Edges}
     {nodeTypes}
     fitView
     connectionLineType={ConnectionLineType.Step}

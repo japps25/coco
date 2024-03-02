@@ -39,6 +39,14 @@ export class CocoPipeline {
     return this.description;
   }
 
+  get Color(): string {
+    return this.color;
+  }
+
+  set Color(color: string) {
+    this.color = color;
+  }
+
   pushNodeId(nodeId: string): void {
     this.nodeIds.push(nodeId);
   }

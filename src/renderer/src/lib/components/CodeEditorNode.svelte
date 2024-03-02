@@ -11,10 +11,20 @@
   // @ts-ignore
   const api = window.cocoServerApi as ICocoServerApi;
 
-  export const nodeId = "";
-  export const kernelId = ""; // The ID of the kernel that this editor node is connected to
+  type $$Props = NodeProps;
 
+  let isConnectable: NodeProps["isConnectable"];
+  let nodeId: NodeProps["id"];
+
+  let show: NodeProps["data"]["show"];
+  let value: NodeProps["data"]["value"];
+  let kernelId: NodeProps["data"]["kernelId"]; // The ID of the kernel that this editor node is connected to
+
+  // console.log(nodeId, show, value, kernelId);
+
+  let cellName = "";
   let output = "";
+
   const pubCallback = (msg: any): void => {
     // Check if msg.content is an array
     if (Array.isArray(msg.content)) {
@@ -37,25 +47,13 @@
     }
   };
 
-  onMount(async () => {
-    // Set the callback for this editor node
-    api.setPubCallback(callbackID, pubCallback);
-  });
-
-  type $$Props = NodeProps;
-
-  export let isConnectable: $$Props["isConnectable"];
-  let cellName = "";
-  let show = true;
-  let value = "print('Hello from Coco! 🥥')";
-
   const toggleShow = (): void => {
     show = !show;
   };
 
   const handleRun = async (): Promise<void> => {
     output = "";
-    api.executeCode(kernelId, callbackID, value);
+    api.executeCode(kernelId, nodeId, value);
   };
 
   const handleClear = (): void => {
@@ -66,9 +64,20 @@
   const handleDelete = (): void => {
     console.log("delete");
   };
+
+  onMount(async () => {
+    // const node = get(nodeStore);
+    // nodeId = node.id;
+    // isConnectable = node.connectable;
+    // show = node.data.show;
+    // value = node.data.value;
+    // kernelId = node.data.kernelId;
+    // Set the callback for this editor node
+    api.setPubCallback(nodeId, pubCallback);
+  });
 </script>
 
-<Handle type="target" position={Position.Left} style="" {isConnectable} />
+<Handle type="target" position={Position.Top} {isConnectable} />
 <div class="coco-editor__cell-wrapper">
   <div class="coco-editor__header">
     <span class="coco-editor__cell-core">
@@ -131,7 +140,7 @@
     </div>
   {/if}
 </div>
-<Handle type="source" position={Position.Left} />
+<Handle type="source" position={Position.Bottom} />
 
 <style>
   .coco-editor__cell-wrapper {
